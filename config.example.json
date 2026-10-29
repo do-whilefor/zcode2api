@@ -1,14 +1,24 @@
 {
+  "inference_driver": "http",
   "web_port": 0,
   "gateway_port": 0,
   "host": "127.0.0.1",
   "poll_interval_sec": 60,
-  "tool_result_timeout_sec": 600,
+  "http": {
+    "client_version": "0.17.0",
+    "first_token_timeout_ms": 60000,
+    "idle_timeout_ms": 120000,
+    "total_timeout_ms": 0
+  },
+  "retry": {
+    "rate_limit_retry_interval_ms": 1000,
+    "busy_wait_sec": 60,
+    "total_budget_ms": 120000
+  },
   "app_version": "3.16.2",
   "claim_auto_enabled": true,
   "claim_auto_min": 240,
   "trust_proxy": false,
   "admin_bind_public": false,
-  "session_mode": "yolo",
-  "max_slots": 8
+  "conversation_affinity_minutes": 10
 }

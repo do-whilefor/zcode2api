@@ -1,0 +1,9 @@
+node_modules
+bin
+coverage.out
+data
+config.json
+.git
+.zcode
+test
+*.log

@@ -1,6 +1,7 @@
 node_modules/
+bin/
+coverage.out
 data/
 .zcode/
 config.json
-test/claude-fixture/isolated-config/
 probe-*.json
