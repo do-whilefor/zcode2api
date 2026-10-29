@@ -1,8 +1,19 @@
+<div align="center">
+
+<img src="src/web/favicon.svg" alt="zcode2api" width="80" height="80">
+
 # zcode2api
 
 **ZCode(智谱、Zai）毒鸡蛋反代，让免费账号的重试、领卡和多账号管理交给网关。**
 
-[概述](#概述) · [使用方法](#使用方法) · [配置说明](#配置说明) · [常见问题](#常见问题) · [安全范围](#安全范围) · [许可证与相关文件](#许可证与相关文件)
+[![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Docker](https://img.shields.io/badge/Docker-supported-2496ED?logo=docker&logoColor=white)](#安装与启动)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-555)](#环境要求)
+[![License](https://img.shields.io/badge/License-Apache_2.0-orange?logo=apache&logoColor=white)](LICENSE)
+
+[概述](#概述) · [使用方法](#使用方法) · [配置说明](#配置说明) · [安全范围](#安全范围) · [许可证与相关文件](#许可证与相关文件)
+
+</div>
 
 ## 概述
 
