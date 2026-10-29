@@ -1,0 +1,6 @@
+node_modules/
+data/
+.zcode/
+config.json
+test/claude-fixture/isolated-config/
+probe-*.json

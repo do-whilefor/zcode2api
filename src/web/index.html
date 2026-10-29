@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zcode2api 控制台</title>
+<link rel="stylesheet" href="/style.css">
+<script>
+  // 首屏无闪烁：主题在渲染前应用（localStorage 记忆，默认跟随系统）
+  (function () {
+    var t = localStorage.getItem('z2a_theme');
+    if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+</head>
+<body>
+<div id="login-view" class="login-wrap hidden">
+  <form id="login-form" class="login-card">
+    <span class="login-logo">
+      <svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+    </span>
+    <h1>zcode2api</h1>
+    <p class="sub">ZCode 多账号免费额度管理器与推理网关</p>
+    <input type="password" id="login-password" placeholder="管理员密码" autocomplete="current-password" required>
+    <button type="submit" class="btn primary">登录</button>
+    <p id="login-error" class="error"></p>
+  </form>
+</div>
+
+<div id="app-view" class="hidden">
+  <div class="shell">
+    <!-- 顶部工具药丸行（参考站：右对齐 搜索/语言/版本切换 位置） -->
+    <div class="utilrow">
+      <span class="pill" id="ports-label2" style="cursor:default"></span>
+      <button class="pill" id="theme-btn" aria-label="切换亮/暗主题" title="切换亮/暗主题">
+        <svg class="lucide" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <span id="theme-btn-label">浅色</span>
+      </button>
+      <button class="pill" id="logout-btn">
+        <svg class="lucide" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        退出
+      </button>
+    </div>
+    <main id="main" class="container-7xl"></main>
+  </div>
+  <nav id="nav" class="dock-wrap"></nav>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "web_port": 0,
+  "gateway_port": 0,
+  "host": "127.0.0.1",
+  "poll_interval_sec": 60,
+  "tool_result_timeout_sec": 600,
+  "app_version": "3.16.2",
+  "claim_auto_enabled": true,
+  "claim_auto_min": 240,
+  "trust_proxy": false,
+  "admin_bind_public": false,
+  "session_mode": "yolo",
+  "max_slots": 8
+}
