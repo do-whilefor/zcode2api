@@ -3,8 +3,8 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8765:8765"
-      - "127.0.0.1:8766:8766"
+      - "127.0.0.1:6789:6789"
+      - "127.0.0.1:6780:6780"
     volumes:
       - ./data:/app/data
     environment:

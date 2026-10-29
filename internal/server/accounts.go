@@ -289,7 +289,7 @@ func (a *App) importLocal(ctx context.Context, b M) (M, error) {
 	return M{"ok": n > 0, "imported": n, "results": []any{result}}, nil
 }
 func (a *App) importCookie(ctx context.Context, b M, target M) (M, error) {
-	token := stringsTrim(str(b["webJwt"]))
+	token := strings.TrimSpace(str(b["webJwt"]))
 	p := jwtPayload(token)
 	if p == nil || (p["user_id"] != nil && p["user_channel"] == nil) {
 		return M{"ok": false, "error": "请输入有效的网页会话 JWT；客户端凭据请使用本机导入/OAuth"}, nil

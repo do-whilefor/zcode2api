@@ -12,17 +12,16 @@ function claimAccountMarkup(preview, account = {}) {
   const taskNames = { login_device: '登录客户端', referral_bind_code: '绑定邀请码', send_message: '发送消息' };
   const rewards = preview.incentives?.active ? preview.incentives.rewards || [] : [];
   return `<article class="claim-account">
-    <header class="claim-account-header"><div class="cell-name"><span class="avatar">${esc((name || '?').slice(0, 1))}</span><div><h3>${esc(name)}</h3><p>${account.family === 'zai' ? 'Z.ai' : account.family === 'bigmodel' ? 'BigModel' : 'ZCode'}${account.platform_name && account.label !== name ? ` · ${esc(account.label)}` : ''}</p></div></div>
+    <header class="claim-account-header"><div class="cell-name"><span class="avatar">${esc((name || '?').slice(0, 1))}</span><div><h2>${esc(name)}</h2><p>${account.family === 'zai' ? 'Z.ai' : account.family === 'bigmodel' ? 'BigModel' : 'ZCode'}${account.platform_name && account.label !== name ? ` · ${esc(account.label)}` : ''}</p></div></div>
       <div class="claim-account-heading-actions">${plans.length ? `<span class="badge ok">${plans.length} 项可领取</span>` : pending.length ? '<span class="badge pending">有额度待生效</span>' : '<span class="badge">暂无可领</span>'}<button type="button" class="text-action" data-view-account="${esc(preview.account_id)}">查看账号 ↗</button></div>
     </header>
     ${preview.error ? `<div class="inline-notice error" role="alert">可领额度查询失败：${esc(preview.error)}</div>` : ''}
-    ${plans.map(plan => `<section class="claim-plan"><div><span class="section-kicker">可领取</span><h4>${esc(plan.name || plan.plan_id)}</h4><div class="claim-grants">${(plan.entitlements || []).map(entitlement => `<div><span>${esc(entitlement.show_name || entitlement.meter || '额度')}</span><strong title="${esc(fmtInt(entitlement.grant_units))}">${fmtQuota(entitlement.grant_units)}<small> ${esc(entitlement.unit_type || 'token')}</small></strong></div>`).join('') || '<p class="quiet-message">额度以领取结果为准</p>'}</div></div><button type="button" class="btn primary" data-claim="${esc(preview.account_id)}" data-plan="${esc(plan.plan_id)}">领取额度</button></section>`).join('')}
-    ${pending.length ? `<section class="claim-pending"><div class="section-heading"><h4>${icon('timer', 14)} 已领取 · 待生效</h4><span>不计入当前可用余额</span></div>${pending.map(bucket => `<div class="claim-pending-row"><div><strong>${esc(bucket.name)}</strong><span>${esc(bucket.plan_name || '已领取额度')}</span></div><strong title="${esc(fmtInt(bucket.total))} ${esc(bucket.unit || 'token')}">${fmtQuota(bucket.total)}<small> ${esc(bucket.unit || 'token')}</small></strong><time title="${esc(fmtTime(bucket.effective_at))}">${bucket.effective_at > Date.now() ? `${esc(fmtCompactTime(bucket.effective_at))} 生效` : '等待余额刷新'}</time></div>`).join('')}</section>` : ''}
-    ${!preview.error && !plans.length && !pending.length ? '<p class="claim-no-plans">当前没有可领取或待生效的额度。</p>' : ''}
+    ${plans.map(plan => `<section class="claim-plan"><div><span class="section-kicker">可领取</span><h3>${esc(plan.name || plan.plan_id)}</h3><div class="claim-grants">${(plan.entitlements || []).map(entitlement => `<div><span>${esc(entitlement.show_name || entitlement.meter || '额度')}</span><strong title="${esc(fmtInt(entitlement.grant_units))}">${fmtQuota(entitlement.grant_units)}<small> ${esc(entitlement.unit_type || 'token')}</small></strong></div>`).join('') || '<p class="quiet-message">额度以领取结果为准</p>'}</div></div><button type="button" class="btn primary" data-claim="${esc(preview.account_id)}" data-plan="${esc(plan.plan_id)}">领取额度</button></section>`).join('')}
+    ${pending.length ? `<section class="claim-pending"><div class="section-heading"><h3>${icon('timer', 14)} 已领取 · 待生效</h3><span>不计入当前可用余额</span></div>${pending.map(bucket => `<div class="claim-pending-row"><div><strong>${esc(bucket.name)}</strong><span>${esc(bucket.plan_name || '已领取额度')}</span></div><strong title="${esc(fmtInt(bucket.total))} ${esc(bucket.unit || 'token')}">${fmtQuota(bucket.total)}<small> ${esc(bucket.unit || 'token')}</small></strong><time title="${esc(fmtTime(bucket.effective_at))}">${bucket.effective_at > Date.now() ? `${esc(fmtCompactTime(bucket.effective_at))} 生效` : '等待余额刷新'}</time></div>`).join('')}</section>` : ''}
     ${preview.incentives_error ? `<div class="inline-notice muted">客户端任务暂不可用：${esc(preview.incentives_error)}</div>` : rewards.length ? `<details class="claim-tasks" ${!plans.length && !pending.length ? 'open' : ''}><summary><span>客户端奖励任务</span><span class="muted">${rewards.length} 项 · 查看进度</span></summary><div class="claim-task-list">${rewards.map(reward => {
       const target = Number(reward.target) || 0, current = Math.max(0, Number(reward.current) || 0);
       const progress = target > 0 ? Math.max(0, Math.min(1, current / target)) : 0;
-      return `<div class="claim-task"><div class="section-heading"><h4>${esc(reward.title)}</h4><span>${reward.issued > 0 ? '已发放' : target > 0 ? `${fmtInt(current)} / ${fmtInt(target)}` : '等待任务更新'}</span></div>${reward.description ? `<p>${esc(reward.description)}</p>` : ''}${target > 0 ? `<div class="task-track" role="progressbar" aria-label="${esc(reward.title)}" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(current, target)}"><i style="transform:scaleX(${progress})"></i></div>` : ''}${(reward.plan?.entitlements || []).map(item => `<span class="quota-meta">${esc(item.show_name || '奖励额度')} · ${fmtQuota(item.grant_units)} ${esc(item.unit_type || 'token')}</span>`).join('')}</div>`;
+      return `<div class="claim-task"><div class="section-heading"><h3>${esc(reward.title)}</h3><span>${reward.issued > 0 ? '已发放' : target > 0 ? `${fmtInt(current)} / ${fmtInt(target)}` : '等待任务更新'}</span></div>${reward.description ? `<p>${esc(reward.description)}</p>` : ''}${target > 0 ? `<div class="task-track" role="progressbar" aria-label="${esc(reward.title)}" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(current, target)}"><i style="transform:scaleX(${progress})"></i></div>` : ''}${(reward.plan?.entitlements || []).map(item => `<span class="quota-meta">${esc(item.show_name || '奖励额度')} · ${fmtQuota(item.grant_units)} ${esc(item.unit_type || 'token')}</span>`).join('')}</div>`;
     }).join('')}${preview.incentives.tasks?.length ? `<div class="task-checklist">${preview.incentives.tasks.map(task => `<span class="${task.completed ? 'ok-text' : 'muted'}">${task.completed ? '✓' : '○'} ${esc(taskNames[task.key] || task.key)}</span>`).join('')}</div>` : ''}<a class="reward-link" href="https://zcode.z.ai/cn/rewards" target="_blank" rel="noopener noreferrer">前往 ZCode 完成任务 ↗</a><p class="quiet-message">请使用对应账号登录，任务奖励由 ZCode 发放。</p></div></details>` : ''}
   </article>`;
 }
@@ -104,15 +103,15 @@ async function pageClaims(main) {
     finally { busy = false; syncBusy(); }
   }
   $('#claims-refresh', main).addEventListener('click', load);
-  $('#claims-account', main).addEventListener('change', event => { filter.account = event.target.value; paintAccounts(); });
+  $('#claims-account', main).addEventListener('change', event => { filter.account = event.target.value; paintAccounts(); syncRoute(); });
   $('#claims-filters', main).addEventListener('click', event => {
     const button = event.target.closest('[data-claim-view]');
-    if (button) { filter.view = button.dataset.claimView; paintAccounts(); $('#claims-filters [aria-pressed="true"]', main)?.focus(); }
+    if (button) { filter.view = button.dataset.claimView; paintAccounts(); syncRoute(); $('#claims-filters [aria-pressed="true"]', main)?.focus(); }
   });
   content.addEventListener('click', event => {
     const accountLink = event.target.closest('[data-view-account]');
     if (accountLink) { viewAccount(accountLink.dataset.viewAccount); return; }
-    if (event.target.closest('[data-open-accounts]')) { currentPage = 'accounts'; renderNav(); render(); return; }
+    if (event.target.closest('[data-open-accounts]')) { navigateTo('accounts'); return; }
     const button = event.target.closest('[data-claim]');
     if (!button || button.disabled) return;
     act(async () => {
@@ -127,14 +126,14 @@ async function pageClaims(main) {
       try {
         const result = await api('/api/claims/claim', { method: 'POST', body: job });
         if (result.ok) claimed++;
-      } catch { /* 继续处理其他账号，失败结果统一提示。 */ }
+      } catch { }
     }
     const failed = jobs.length - claimed;
     toast(`领取 ${claimed} 张${failed ? `，${failed} 项失败，请查看领取记录或刷新重试` : ''}`, failed ? 'err' : 'ok');
   }));
   $('#claims-history', main).addEventListener('click', event => {
     const button = event.target.closest('[data-claim-history]');
-    if (button && !button.disabled) { filter.historyPage += Number(button.dataset.claimHistory); paintHistory(); }
+    if (button && !button.disabled) { filter.historyPage += Number(button.dataset.claimHistory); paintHistory(); enhanceTables(main); syncRoute(); }
   });
   await load();
 }

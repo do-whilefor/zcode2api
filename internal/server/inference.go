@@ -40,7 +40,7 @@ func classify(f *Failure) *Failure {
 		kind, retry = "server", true
 	case "1234":
 		kind, retry = "network", true
-	case "1312", "engine_overloaded_error", "overloaded_error":
+	case "503", "529", "1312", "engine_overloaded_error", "overloaded_error":
 		kind, retry = "overload", true
 	case "3008", "3009", "3010":
 		kind, retry = "busy", true
@@ -63,6 +63,8 @@ func classify(f *Failure) *Failure {
 			kind = "auth"
 		case f.Status == 403:
 			kind = "permission"
+		case f.Status == 503 || f.Status == 529:
+			kind, retry = "overload", true
 		case f.Status >= 500:
 			kind, retry = "server", true
 		case f.Status == 400:

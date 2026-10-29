@@ -22,6 +22,7 @@ import (
 func testApp(t *testing.T) *App {
 	t.Helper()
 	root := t.TempDir()
+	must(t, os.WriteFile(filepath.Join(root, "config.json"), []byte(`{"web_port":0,"gateway_port":0}`), 0600))
 	a, e := New(root, filepath.Join(root, "data"), fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("console")}})
 	if e != nil {
 		t.Fatal(e)
@@ -340,8 +341,23 @@ func TestResponsesHistoryIsolationAndDeletion(t *testing.T) {
 	equal(t, request(h, "GET", "/v1/responses/"+transient, secret, nil).Code, 404)
 }
 func TestImmediateRotationAndNoReplay(t *testing.T) {
-	for _, code := range []int{429, 3008, 1312, 3103} {
-		t.Run(fmt.Sprint(code), func(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		status int
+		code   any
+	}{
+		{"rate-limit", 429, 429},
+		{"busy", 429, 3008},
+		{"concurrency-3009", 429, 3009},
+		{"concurrency-3010", 429, 3010},
+		{"overload-1312", 429, 1312},
+		{"quota", 429, 3103},
+		{"http-503", 503, nil},
+		{"http-529", 529, nil},
+		{"provider-503", 503, 503},
+		{"provider-529", 529, 529},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
 			a := testApp(t)
 			_, secret, accounts := testPool(t, a, 2)
 			a.mu.Lock()
@@ -359,7 +375,7 @@ func TestImmediateRotationAndNoReplay(t *testing.T) {
 				token := r.Header.Get("X-Api-Key")
 				calls = append(calls, token)
 				if token == "synthetic-0" {
-					writeJSON(w, 429, M{"code": code, "message": "limited"})
+					writeJSON(w, tc.status, M{"code": tc.code, "message": "limited"})
 					return
 				}
 				w.Header().Set("Content-Type", "text/event-stream")

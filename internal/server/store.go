@@ -19,7 +19,6 @@ import (
 //go:embed schema.sql
 var schema string
 
-func stringsTrim(s string) string { return strings.TrimSpace(s) }
 func openDB(data string) (*sql.DB, error) {
 	d, e := sql.Open("sqlite", filepath.Join(data, "zcode2api.db"))
 	if e != nil {
@@ -155,7 +154,7 @@ func loadSecret(data string) (string, error) {
 	p := filepath.Join(data, "secret.key")
 	b, e := os.ReadFile(p)
 	if e == nil {
-		return stringsTrim(string(b)), nil
+		return strings.TrimSpace(string(b)), nil
 	}
 	if !os.IsNotExist(e) {
 		return "", e

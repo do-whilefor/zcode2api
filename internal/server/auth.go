@@ -10,9 +10,9 @@ import (
 func bearer(r *http.Request) string {
 	s := r.Header.Get("Authorization")
 	if strings.HasPrefix(s, "Bearer ") {
-		return stringsTrim(s[7:])
+		return strings.TrimSpace(s[7:])
 	}
-	return stringsTrim(r.Header.Get("X-Api-Key"))
+	return strings.TrimSpace(r.Header.Get("X-Api-Key"))
 }
 func (a *App) adminAuth(r *http.Request) bool {
 	token := bearer(r)
@@ -38,7 +38,7 @@ func (a *App) password(v any) bool {
 }
 func ipAllowed(ip string, patterns []any) bool {
 	for _, v := range patterns {
-		p := stringsTrim(str(v))
+		p := strings.TrimSpace(str(v))
 		if p == "" {
 			continue
 		}
@@ -113,7 +113,7 @@ func (a *App) modelAllowed(k M, model string) bool {
 	return false
 }
 func (a *App) resolveModel(s string) string {
-	s = stringsTrim(s)
+	s = strings.TrimSpace(s)
 	s = modelSuffix.ReplaceAllString(s, "")
 	for alias, v := range obj(a.config()["aliases"]) {
 		if strings.EqualFold(alias, s) {

@@ -46,7 +46,6 @@ const ICONS = {
   folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
   settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
   zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
-  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
   pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
   trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
@@ -57,10 +56,9 @@ const ICONS = {
   layers: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
   timer: '<line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/>',
   plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
-  db: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
-  ticket: '<path d="M2 9a3 3 0 0 1 1 5.83 3 3 0 0 1 4.17 4.17 3 3 0 0 1 5.83 1 3 3 0 0 1 5.83-1 3 3 0 0 1 4.17-4.17 3 3 0 0 1-1-5.83 3 3 0 0 1-4.17-4.17 3 3 0 0 1-5.83-1 3 3 0 0 1-5.83 1A3 3 0 0 1 2 9z"/><circle cx="12" cy="12" r="2"/>',
-  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>',
   shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  'eye-off': '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
 };
 const icon = (name, size = 16) =>
   `<svg class="lucide" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -68,9 +66,12 @@ const icon = (name, size = 16) =>
 let TOKEN = sessionStorage.getItem('z2a_token') || localStorage.getItem('z2a_token') || '';
 let RUNTIME = null;
 let currentPage = 'dashboard';
+const UI = globalThis.Z2AUI;
+let settingsDirty = false;
+let settingsSaving = false;
+let routeURL = location.hash;
 
 async function api(path, opts = {}) {
-  // Fastify 会拒绝空 body 搭配 JSON Content-Type。
   const hasBody = opts.body !== undefined;
   const res = await fetch(path, {
     method: opts.method || 'GET',
@@ -80,7 +81,7 @@ async function api(path, opts = {}) {
     },
     body: hasBody ? JSON.stringify(opts.body) : undefined,
   });
-  if (res.status === 401 && currentPage !== 'login') { showLogin(); throw new Error('未登录'); }
+  if (res.status === 401) { showLogin(); throw new Error('未登录'); }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || data.msg || `HTTP ${res.status}`);
   return data;
@@ -139,14 +140,38 @@ $('#login-form').addEventListener('submit', async (e) => {
     card.classList.add('shake');
   } finally { btn.classList.remove('loading'); }
 });
-$('#logout-btn').addEventListener('click', async () => {
-  try { await api('/api/auth/logout', { method: 'POST' }); } catch { /* 忽略 */ }
-  TOKEN = ''; logCache = null; localStorage.removeItem('z2a_token'); sessionStorage.removeItem('z2a_token'); showLogin();
+$('#pw-toggle').addEventListener('click', () => {
+  const input = $('#login-password');
+  const btn = $('#pw-toggle');
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.setAttribute('aria-pressed', String(show));
+  btn.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+  btn.innerHTML = icon(show ? 'eye-off' : 'eye', 15);
+});
+document.addEventListener('click', async (e) => {
+  const logout = e.target.closest('#logout-btn');
+  if (logout) {
+    if (!await mayLeaveSettings()) return;
+    try { await api('/api/auth/logout', { method: 'POST' }); } catch { }
+    TOKEN = ''; logCache = null; localStorage.removeItem('z2a_token'); sessionStorage.removeItem('z2a_token'); showLogin();
+    return;
+  }
+  const themeBtn = e.target.closest('#theme-btn');
+  if (themeBtn) {
+    const root = document.documentElement;
+    root.classList.remove('theme-swap');
+    void root.offsetWidth;
+    root.classList.add('theme-swap');
+    setTheme(root.classList.contains('dark') ? 'light' : 'dark');
+  }
 });
 
 function applyThemeBtn() {
   const label = $('#theme-btn-label');
-  if (label) label.textContent = document.documentElement.classList.contains('dark') ? '深色' : '浅色';
+  const theme = document.documentElement.classList.contains('dark') ? '深色' : '浅色';
+  if (label) label.textContent = theme;
+  $('#theme-btn')?.setAttribute('aria-label', `${theme}，切换亮/暗主题`);
 }
 function setTheme(mode) {
   if (mode === 'system') localStorage.removeItem('z2a_theme');
@@ -157,13 +182,6 @@ function setTheme(mode) {
   if (selector) { selector.value = mode; syncSelect(selector); }
   applyThemeBtn();
 }
-$('#theme-btn').addEventListener('click', () => {
-  const root = document.documentElement;
-  root.classList.remove('theme-swap');
-  void root.offsetWidth;
-  root.classList.add('theme-swap');
-  setTheme(root.classList.contains('dark') ? 'light' : 'dark');
-});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (!localStorage.getItem('z2a_theme')) setTheme('system');
 });
@@ -174,28 +192,96 @@ const PAGES = [
   ['accounts', '账号', 'users'], ['claims', '领卡', 'gift'], ['keys', '密钥', 'key'], '|',
   ['usage', '用量', 'trending'], ['logs', '日志', 'scroll'], ['groups', '分组', 'folder'], ['settings', '设置', 'settings'],
 ];
+function routeValues() {
+  if (currentPage === 'dashboard') { const f = window._dashboardAccounts || {}; return { page: f.page > 1 ? f.page : '', size: f.size && f.size !== 10 ? f.size : '' }; }
+  if (currentPage === 'accounts') { const f = window._accFilter || {}; return { q: f.q, status: f.status === 'all' ? '' : f.status, sort: f.sort === 'default' ? '' : f.sort, page: f.page > 1 ? f.page : '', size: f.size && f.size !== 25 ? f.size : '' }; }
+  if (currentPage === 'usage') { const f = window._usageDetail || {}; return { hours: window._usageHours || 24, tab: f.tab || 'model', page: f.pages?.[f.tab] || 1 }; }
+  if (currentPage === 'logs') { const f = window._logFilter || {}; return { tab: window._logTab || 'logs', hours: f.hours || 'all', status: f.status || 'all', model: f.model || 'all', page: window._logPage?.[window._logTab || 'logs'] || 1 }; }
+  if (currentPage === 'claims') { const f = window._claimsFilter || {}; return { account: f.account || 'all', view: f.view || 'all', page: f.historyPage || 1 }; }
+  return {};
+}
+function syncRoute(replace = true) {
+  const hash = UI.routeHash(currentPage, routeValues());
+  if (hash !== location.hash) history[replace ? 'replaceState' : 'pushState'](null, '', hash);
+  routeURL = hash;
+  document.title = `${PAGES.find(p => p[0] === currentPage)?.[1] || '控制台'} · zcode2api`;
+}
+function restoreRoute(route) {
+  const q = route.query;
+  const valid = (value, choices, fallback) => choices.includes(value) ? value : fallback;
+  const page = Math.max(1, Math.min(100000, Math.floor(Number(q.page)) || 1));
+  currentPage = route.page;
+  if (currentPage === 'dashboard') window._dashboardAccounts = { page, size: Number(valid(q.size, ['10', '25', '50'], '10')) };
+  if (currentPage === 'accounts') window._accFilter = { q: (q.q || '').slice(0, 200), status: valid(q.status, ['active', 'needs_relogin', 'cooldown', 'expired', 'web_only'], 'all'), sort: valid(q.sort, ['remaining', 'expiring'], 'default'), page, size: Number(valid(q.size, ['25', '50', '100'], '25')) };
+  if (currentPage === 'usage') { window._usageHours = Number(valid(q.hours, ['24', '168', '720'], '24')); const tab = valid(q.tab, ['model', 'key', 'account', 'status'], 'model'); window._usageDetail = { tab, pages: { [tab]: page } }; }
+  if (currentPage === 'logs') { window._logTab = valid(q.tab, ['logs', 'sched', 'audit'], 'logs'); window._logFilter = { hours: valid(q.hours, ['24', '168', '720'], 'all'), status: valid(q.status, ['success', 'busy', 'error'], 'all'), model: (q.model || 'all').slice(0, 160) }; window._logPage = { [window._logTab]: page }; }
+  if (currentPage === 'claims') window._claimsFilter = { account: (q.account || 'all').slice(0, 160), view: valid(q.view, ['ready', 'pending', 'error'], 'all'), historyPage: page };
+}
+async function mayLeaveSettings() {
+  if (currentPage !== 'settings' || !settingsDirty) return true;
+  if (settingsSaving) { toast('正在保存设置，请稍候'); return false; }
+  return confirmAction('设置尚未保存', '修改已保留为本标签页的草稿，返回设置可继续编辑。确定离开？', '保留草稿并离开', false);
+}
+async function navigateTo(page) {
+  if (!PAGES.some(p => p[0] === page) || page === currentPage) return false;
+  if (!await mayLeaveSettings()) return false;
+  currentPage = page;
+  delete $('#main').dataset.fp;
+  syncRoute(false);
+  renderNav();
+  await render();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  return true;
+}
+window.addEventListener('hashchange', async () => {
+  if (location.hash === '#main' || location.hash === routeURL) return;
+  if (!await mayLeaveSettings()) { history.replaceState(null, '', routeURL); return; }
+  restoreRoute(UI.readRoute(location.hash));
+  delete $('#main').dataset.fp;
+  syncRoute(); renderNav(); await render();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+});
+window.addEventListener('beforeunload', e => {
+  if (currentPage === 'settings' && settingsDirty) { e.preventDefault(); e.returnValue = ''; }
+});
 function renderNav() {
   const nav = $('#nav');
-  nav.innerHTML = '<div class="dock"></div>';
-  const dock = $('.dock', nav);
+  const dock = document.createElement('div');
+  dock.className = 'dock';
   for (const entry of PAGES) {
     if (entry === '|') { dock.appendChild(h('<span class="dock-sep"></span>')); continue; }
     const [id, label, ic] = entry;
     const b = h(`<button class="dock-item${id === currentPage ? ' active' : ''}" data-page="${id}" aria-label="${label}" ${id === currentPage ? 'aria-current="page"' : ''}>
       <span class="di">${icon(ic, 16)}</span><span class="tip">${label}</span>
     </button>`);
-    b.addEventListener('click', () => { currentPage = id; delete $('#main').dataset.fp; renderNav(); render(); });
+    b.addEventListener('click', () => navigateTo(id));
     dock.appendChild(b);
   }
+  nav.innerHTML = '';
+  nav.appendChild(dock);
+  applyThemeBtn();
 }
 
 let pendingRender = null;
+let renderTask = null;
 let lastRefreshAt = 0;
-async function render(opts = {}) {
+function render(opts = {}) {
+  if (renderTask) { pendingRender = opts; return renderTask; }
+  renderTask = renderPage(opts).finally(async () => {
+    renderTask = null;
+    if (pendingRender) { const next = pendingRender; pendingRender = null; await render(next); }
+  });
+  return renderTask;
+}
+async function renderPage(opts = {}) {
   const main = $('#main');
-  if (main.dataset.loading === '1') { pendingRender = opts; return; }
+  const page = currentPage;
+  main.querySelector('.page-error')?.remove();
+  const previous = main.dataset.page === page ? [...main.childNodes] : [];
+  if (!previous.length) main.innerHTML = `${pagehead(PAGES.find(p => p[0] === page)?.[1] || '控制台', '正在加载…')}<div class="page-skeleton" aria-hidden="true"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>`;
   main.dataset.loading = '1';
-  // 自动刷新关掉入场动画（避免闪动）；用户主动导航保留 fade-up
+  main.setAttribute('aria-busy', 'true');
+  // 自动刷新不播放入场动画。
   main.classList.toggle('no-anim', !!opts.swap);
   try {
     if (currentPage === 'dashboard') await pageDashboard(main);
@@ -207,14 +293,34 @@ async function render(opts = {}) {
     else if (currentPage === 'settings') await pageSettings(main);
     else if (currentPage === 'logs') await pageLogs(main);
     enhanceSelects(main);
+    enhanceTables(main);
+    main.dataset.page = page;
+    if (page === currentPage) syncRoute();
   } catch (e) {
-    main.innerHTML = `<p class="error">${esc(e.message)}</p>`;
+    if (page !== currentPage) return;
+    if (previous.length) main.replaceChildren(...previous);
+    else main.innerHTML = pagehead(PAGES.find(p => p[0] === page)?.[1] || '控制台');
+    const notice = h(`<section class="page-error" role="alert">${icon('zap', 20)}<div><h2>${previous.length ? '刷新失败，已保留上次内容' : '暂时无法加载页面'}</h2><p>${esc(e.message)}</p></div><button type="button" class="btn" data-retry-page>${icon('refresh', 14)}重试</button></section>`);
+    main.prepend(notice);
+    $('[data-retry-page]', notice).addEventListener('click', () => render({ swap: true }));
   } finally {
     lastRefreshAt = Date.now();
     delete main.dataset.loading;
-    if (pendingRender) { const next = pendingRender; pendingRender = null; render(next); }
+    main.setAttribute('aria-busy', 'false');
   }
 }
+
+function enhanceTables(root) {
+  root.querySelectorAll('.tablecard:not(.account-table):not(.compact-account-table):not(.log-desktop) table').forEach(table => {
+    const headers = [...table.querySelectorAll('tr:first-child th')].map(th => th.textContent.trim());
+    if (headers.length < 4) return;
+    table.closest('.tablecard').classList.add('responsive-table');
+    table.querySelectorAll('tr').forEach(row => [...row.children].forEach((cell, index) => {
+      if (cell.tagName === 'TD') cell.dataset.label = headers[index] || '';
+    }));
+  });
+}
+$('.skip-link')?.addEventListener('click', e => { e.preventDefault(); $('#main').tabIndex = -1; $('#main').focus(); });
 
 const selectControls = new WeakMap();
 let openSelect = null;
@@ -380,9 +486,9 @@ function modal(title, contentEl) {
   return { close };
 }
 
-function confirmAction(title, message, confirmLabel = '删除') {
+function confirmAction(title, message, confirmLabel = '删除', danger = true) {
   return new Promise((resolve) => {
-    const form = h(`<div class="confirm-content"><p>${esc(message)}</p><div class="modal-actions"><button type="button" class="btn" data-cancel>取消</button><button type="button" class="btn danger-solid" data-confirm>${esc(confirmLabel)}</button></div></div>`);
+    const form = h(`<div class="confirm-content"><p>${esc(message)}</p><div class="modal-actions"><button type="button" class="btn" data-cancel>取消</button><button type="button" class="btn ${danger ? 'danger-solid' : 'primary'}" data-confirm>${esc(confirmLabel)}</button></div></div>`);
     const dialog = modal(title, form);
     let settled = false;
     const finish = (result) => { if (settled) return; settled = true; dialog.close(); resolve(result); };
@@ -408,7 +514,6 @@ function statcard(label, value, { tone = 'neutral', hint = '', icon: ic = '' } =
   </div>`;
 }
 
-/* 新插入的进度条从 0 生长到目标宽度 */
 function growBars(scope) {
   (scope || document).querySelectorAll('.bar:not(.grown)').forEach((bar) => {
     bar.classList.add('grown');
@@ -420,49 +525,101 @@ function growBars(scope) {
   });
 }
 
+function accountPagerMarkup(page, sizes) {
+  return `<nav class="account-pagination" aria-label="账号列表分页"><span class="account-page-range">${page.start}–${page.end} / ${fmtInt(page.total)} 个账号</span><label class="account-page-size">每页<select data-account-size aria-label="每页账号数">${sizes.map(size => `<option value="${size}" ${page.pageSize === size ? 'selected' : ''}>${size} 条</option>`).join('')}</select></label><div class="account-page-controls"><button type="button" class="btn" data-account-page="1" aria-label="账号列表首页" ${page.page === 1 ? 'disabled' : ''}>«</button><button type="button" class="btn" data-account-page="${page.page - 1}" aria-label="账号列表上一页" ${page.page === 1 ? 'disabled' : ''}>‹</button><span>${page.page} / ${page.pages}</span><button type="button" class="btn" data-account-page="${page.page + 1}" aria-label="账号列表下一页" ${page.page === page.pages ? 'disabled' : ''}>›</button><button type="button" class="btn" data-account-page="${page.pages}" aria-label="账号列表末页" ${page.page === page.pages ? 'disabled' : ''}>»</button></div></nav>`;
+}
+
+function bindAccountPager(root, state, paint) {
+  root.addEventListener('click', event => {
+    const button = event.target.closest('[data-account-page]');
+    if (!button || button.disabled) return;
+    const name = button.getAttribute('aria-label');
+    state.page = Number(button.dataset.accountPage); paint(); syncRoute();
+    const next = [...root.querySelectorAll('[data-account-page]')].find(b => b.getAttribute('aria-label') === name && !b.disabled);
+    (next || root.querySelector('.account-pagination .select-trigger'))?.focus({ preventScroll: true });
+  });
+  root.addEventListener('change', event => {
+    if (!event.target.matches('[data-account-size]')) return;
+    state.size = Number(event.target.value); state.page = 1; paint(); syncRoute();
+    root.querySelector('.account-pagination .select-trigger')?.focus({ preventScroll: true });
+  });
+}
+
+function accountNameMarkup(a, action = 'detail') {
+  const name = a.platform_name || a.label || a.id;
+  const family = a.family === 'zai' ? 'Z.ai' : a.family === 'bigmodel' ? 'BigModel' : 'ZCode';
+  return `<button type="button" class="account-name-button" data-act="${action}" data-id="${esc(a.id)}" title="${esc(name)} · ${esc(a.label || '')}"><span class="avatar">${esc((name || '?').slice(0, 1))}</span><span class="account-row-name">${esc(name)}</span><span class="account-row-family">${family}</span></button>`;
+}
+
 async function pageDashboard(main) {
   const d = await api('/api/dashboard');
-  // 自动刷新防抖：数据指纹未变时不重绘
-  const fp = JSON.stringify([d.summary, d.busy_24h]);
+  const fp = JSON.stringify([d.summary, d.busy_24h, Math.floor(Date.now() / 60000)]);
   if (main.dataset.fp === fp) return;
   main.dataset.fp = fp;
-  const accountNames = new Map(d.summary.accounts.map((a) => [a.id, a.platform_name || a.label || a.id]));
-  const usePct = d.summary.totalGranted ? Math.round(d.summary.totalUsed / d.summary.totalGranted * 100) : 0;
-  const busyPct = d.busy_24h.total ? Math.round(d.busy_24h.busy / d.busy_24h.total * 100) : 0;
+  const accounts = d.summary.accounts;
+  const attention = UI.accountAttention(accounts);
+  const usePct = d.summary.totalGranted ? Math.max(0, Math.min(100, Math.round(d.summary.totalUsed / d.summary.totalGranted * 100))) : 0;
+  const busyPct = d.busy_24h.total ? (d.busy_24h.busy / d.busy_24h.total * 100).toFixed(1) + '%' : '—';
+  const items = [
+    { accounts: attention.authorization, title: '账号需要授权或验证', detail: '更新凭据后可恢复使用', status: 'needs_relogin', icon: 'key' },
+    { accounts: attention.unavailable, title: '账号暂不可用', detail: '查看冷却或到期原因', status: 'all', icon: 'users' },
+    { accounts: attention.expiring, title: '额度卡将在 24 小时内到期', detail: '查看最近到期账号与剩余额度', status: 'all', sort: 'expiring', icon: 'timer' },
+  ].filter(item => item.accounts.length);
   main.innerHTML = `
-  ${pagehead('仪表盘', '免费额度池健康度与今日用量总览（每 5 秒自动刷新）')}
-  <section class="stagger">
-    <div class="cards multicol">
-      ${statcard('剩余额度（token）', fmtInt(d.summary.totalRemaining), { tone: 'accent', icon: 'zap', hint: d.summary.totalPending ? `另有 ${fmtInt(d.summary.totalPending)} token 待生效` : undefined })}
-      ${statcard('待生效（token）', fmtInt(d.summary.totalPending), { tone: d.summary.totalPending ? 'info' : 'neutral', icon: 'timer', hint: d.summary.totalPending ? '已领取、到达生效时间后可用' : '当前没有待生效额度' })}
-      ${statcard('累计消耗', fmtInt(d.summary.totalUsed), { tone: 'info', icon: 'activity' })}
-      ${statcard('活跃账号', `${d.summary.activeCount}<small> / ${d.summary.count}</small>`, { tone: d.summary.activeCount ? 'success' : 'danger', icon: 'users', hint: d.summary.activeCount ? '额度正常' : '无可用账号' })}
-      ${statcard('已用比例（当前卡）', usePct + '%', { tone: usePct >= 80 ? 'danger' : usePct >= 50 ? 'warning' : 'neutral', icon: 'gauge' })}
-      ${statcard('24h busy 率', busyPct + '%', { tone: busyPct >= 30 ? 'warning' : 'neutral', icon: 'timer', hint: '3008 并发上限占比' })}
-    </div>
-  </section>
-  <section><h2>${icon('users', 15)} 账号卡片</h2><div class="cards" id="acc-cards"></div></section>`;
-  const wrap = $('#acc-cards');
-  if (!d.summary.accounts.length) wrap.innerHTML = '<p class="muted">暂无已纳管账号。</p>';
-  for (const a of d.summary.accounts) {
-    const pct = a.total ? Math.round(a.used / a.total * 100) : 0;
-    wrap.appendChild(h(`<div class="card accrow">
-      <div class="accrow-top">
-        <span class="avatar">${esc((accountNames.get(a.id) || '?').slice(0, 1))}</span>
-        <span class="accrow-name" title="${esc(a.label || a.id)}">${esc(accountNames.get(a.id))}</span>
-        <span class="badge ${esc(a.status)}">● ${esc(a.status)}</span>
-        <span class="badge sm">${esc(a.family)}</span>
-        <span class="accrow-num">剩余 <b class="tone-accent">${fmtInt(a.remaining)}</b><span class="muted"> / ${fmtInt(a.total)}</span></span>
-        <span class="accrow-num">24h <b>${fmtInt(a.delta24h)}</b></span>
-        <span class="accrow-num">卡到期 <b>${a.card_expires_at ? fmtDur(a.card_expires_at - Date.now()) : '—'}</b></span>
+    ${pagehead('仪表盘', '上游额度与账号池状态 · 每 5 秒同步', `<span class="updated-at">${icon('refresh', 13)}更新于 ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}</span>`)}
+    <section class="dashboard-overview" aria-label="额度与账号池概览">
+      <div class="quota-hero">
+        <span class="eyebrow">当前可用额度</span>
+        <div class="hero-number" title="${esc(fmtInt(d.summary.totalRemaining))} Token">${fmtQuota(d.summary.totalRemaining)}<small>Token</small></div>
+        <div class="hero-quota-meta"><span>当前生效额度已用 ${usePct}%</span><span>总额 ${fmtQuota(d.summary.totalGranted)}</span></div>
+        <div class="bar${usePct >= 80 ? ' danger' : usePct >= 50 ? ' warn' : ''}" role="progressbar" aria-label="当前生效额度已用比例" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${usePct}"><i style="width:${usePct}%"></i></div>
+        <p class="quiet-message">来自上游账号余额，包含通过其他客户端消耗的额度。</p>
       </div>
-      <div class="bar${pct >= 80 ? ' danger' : pct >= 50 ? ' warn' : ''}"><i style="width:${pct}%"></i></div>
-      ${(a.pending_buckets || []).length ? `<p class="muted" style="font-size:12px;margin:4px 0 0" title="${esc(a.pending_buckets.map((p) => `${p.name} ${fmtInt(p.total)} ${p.unit || 'token'}，${fmtTime(p.effective_at)} 生效`).join('；'))}">待生效：${esc(a.pending_buckets.map((p) => `${p.name} ${fmtInt(p.total)}（${fmtDur(p.effective_at - Date.now())}后）`).join('；'))}</p>` : ''}
-      ${a.last_error ? `<p class="error" style="font-size:12px;margin:0">${esc(a.last_error)}</p>` : ''}
-    </div>`));
-  }
-  growBars(wrap);
+      <div class="pool-health">
+        <div class="section-heading"><h2>账号池状态</h2><span class="badge ${d.summary.activeCount ? 'ok' : 'err'}">${d.summary.activeCount ? '有可用账号' : '无可用账号'}</span></div>
+        <div class="health-number">${d.summary.activeCount}<small>/ ${d.summary.count} 个账号可用</small></div>
+        <p class="quiet-message">按账号授权与额度状态统计。</p>
+        <button type="button" class="text-action" data-open-page="accounts">管理账号 ${icon('users', 14)}</button>
+      </div>
+    </section>
+    <section class="dashboard-secondary" aria-label="额度补充指标">
+      ${statcard('当前生效额度已用', fmtQuota(d.summary.totalUsed), { icon: 'activity', hint: '随当前生效的额度卡更新' })}
+      ${statcard('已领取 · 待生效', fmtQuota(d.summary.totalPending), { icon: 'timer', hint: '尚未计入可用额度' })}
+      ${statcard('24 小时忙碌率', busyPct, { tone: Number.parseFloat(busyPct) >= 30 ? 'warning' : 'neutral', icon: 'gauge', hint: `${fmtInt(d.busy_24h.busy)} / ${fmtInt(d.busy_24h.total)} 次网关请求` })}
+    </section>
+    <section class="attention-section"><div class="section-heading"><h2>${icon('timer', 16)}需要关注</h2><span>临期阈值：24 小时</span></div>
+      ${items.length ? `<div class="attention-list">${items.map((item, index) => `<button type="button" class="attention-item" data-attention="${index}"><span class="attention-icon">${icon(item.icon, 18)}</span><span><strong>${item.title}</strong><small>${item.detail}</small></span><b>${item.accounts.length}</b><span aria-hidden="true">›</span></button>`).join('')}</div>` : '<div class="attention-clear">当前没有需要授权、冷却、到期或 24 小时内临期的账号。</div>'}
+    </section>
+    <section><div class="section-heading"><h2>${icon('users', 16)}账号概览</h2><button type="button" class="text-action" data-open-page="accounts">查看全部账号 →</button></div><div class="dashboard-accounts" id="acc-cards"></div></section>`;
 
+  const wrap = $('#acc-cards');
+  const listState = window._dashboardAccounts || (window._dashboardAccounts = { page: 1, size: 10 });
+  function paintAccounts() {
+    const page = UI.paginate(accounts, listState.page, listState.size);
+    listState.page = page.page;
+    if (!accounts.length) { wrap.innerHTML = '<div class="management-empty"><h2>添加第一个账号</h2><p>授权账号后即可查看额度与账号池状态。</p><button type="button" class="btn primary" data-open-page="accounts">前往账号管理</button></div>'; return; }
+    wrap.innerHTML = `<p class="account-scroll-hint">窄屏可左右滚动查看各列，账号名称固定在左侧。</p><div class="tablecard compact-account-table dashboard-account-table" tabindex="0" role="region" aria-label="账号概览横向列表"><table><colgroup><col class="account-name-col"><col style="width:90px"><col style="width:140px"><col style="width:130px"><col style="width:155px"><col style="width:64px"></colgroup><thead><tr><th scope="col">账号</th><th scope="col">状态</th><th scope="col" class="align-right">可用额度 <span class="table-hint">Token</span></th><th scope="col" class="align-right">24 小时消耗</th><th scope="col">最近到期</th><th scope="col">操作</th></tr></thead><tbody>${page.items.map(a => {
+      const expiring = a.card_expires_at && a.card_expires_at - Date.now() <= 86400000;
+      return `<tr data-acc-id="${esc(a.id)}"><td>${accountNameMarkup(a, 'view')}</td><td><span class="badge ${esc(a.status)}" title="${esc(a.last_error || '')}">● ${esc(ACC_STATUS[a.status] || a.status)}</span></td><td class="align-right account-row-number" title="${esc(fmtInt(a.remaining))} / ${esc(fmtInt(a.total))} Token">${fmtQuota(a.remaining)}</td><td class="align-right" title="根据近 24 小时上游余额快照计算，可能包含外部客户端请求">${fmtQuota(a.delta24h)}</td><td class="${expiring ? 'warn-text' : ''}" title="${esc(fmtTime(a.card_expires_at))}">${a.card_expires_at ? fmtPlanRemaining(a.card_expires_at - Date.now()) : '到期时间未知'}</td><td><button type="button" class="text-action" data-act="view" data-id="${esc(a.id)}">详情</button></td></tr>`;
+    }).join('')}</tbody></table></div>${accountPagerMarkup(page, [10, 25, 50])}`;
+    enhanceSelects(wrap);
+  }
+  paintAccounts();
+  bindAccountPager(wrap, listState, paintAccounts);
+  wrap.addEventListener('click', event => {
+    const button = event.target.closest('[data-act="view"]');
+    if (button) viewAccount(button.dataset.id);
+  });
+  main.querySelectorAll('[data-open-page]').forEach(button => button.addEventListener('click', () => {
+    if (button.dataset.openPage === 'accounts') window._accFilter = { q: '', status: 'all', sort: 'default' };
+    navigateTo(button.dataset.openPage);
+  }));
+  main.querySelectorAll('[data-attention]').forEach(button => button.addEventListener('click', () => {
+    const item = items[Number(button.dataset.attention)];
+    window._accFilter = { q: '', status: item.status, sort: item.sort || 'default' };
+    navigateTo('accounts');
+  }));
+  growBars(main);
 }
 
 window._accFilter = window._accFilter || { q: '', status: 'all', sort: 'default' };
@@ -480,16 +637,20 @@ function filterAccounts(accounts, groups, filter) {
 }
 
 function accountQuotaMarkup(account) {
-  const live = (account.quota_buckets || []).map(bucket => `<div class="quota-entry">
-    <div class="quota-entry-top"><span>${esc(bucket.name)}</span><strong title="${esc(fmtInt(bucket.remaining))} token">${fmtQuota(bucket.remaining)}</strong></div>
-    <div class="quota-entry-meta"><span>总额 ${fmtQuota(bucket.total)}</span><span title="${esc(fmtTime(bucket.expires_at))}">${esc(fmtCompactTime(bucket.expires_at))} 到期</span></div>
+  const buckets = account.quota_buckets || [], pendingBuckets = account.pending_buckets || [];
+  const live = buckets.map(bucket => `<div class="quota-entry">
+    <div class="quota-entry-top"><span>${esc(bucket.name)}</span><strong title="${esc(fmtInt(bucket.remaining))} Token">${fmtQuota(bucket.remaining)}</strong></div>
+    <div class="quota-entry-meta"><span>总额 ${fmtQuota(bucket.total)}</span><span title="${esc(fmtTime(bucket.expires_at))}">${bucket.expires_at ? esc(fmtCompactTime(bucket.expires_at)) + ' 到期' : '到期时间未知'}</span></div>
   </div>`).join('');
-  const pending = (account.pending_buckets || []).map(bucket => `<div class="quota-entry quota-entry-pending">
-    <div class="quota-entry-top"><span>${esc(bucket.name)} <em>待生效</em></span><strong title="${esc(fmtInt(bucket.total))} token">${fmtQuota(bucket.total)}</strong></div>
+  const pending = pendingBuckets.map(bucket => `<div class="quota-entry quota-entry-pending">
+    <div class="quota-entry-top"><span>${esc(bucket.name)} <em>待生效</em></span><strong title="${esc(fmtInt(bucket.total))} Token">${fmtQuota(bucket.total)}</strong></div>
     <div class="quota-entry-meta"><span>已领取</span><span title="${esc(fmtTime(bucket.effective_at))}">${bucket.effective_at > Date.now() ? `${esc(fmtCompactTime(bucket.effective_at))} 生效` : '等待余额刷新'}</span></div>
   </div>`).join('');
-  return `<div class="quota-ledger">${live || `<p class="quiet-message">${account.has_zcode_jwt ? account.last_balance ? '暂无生效额度' : '等待余额查询' : '网页账号不参与推理'}</p>`}${pending}</div>`;
+  const remaining = account.remaining ?? (buckets.length ? buckets.reduce((sum, b) => sum + (Number(b.remaining) || 0), 0) : null);
+  return `<div class="quota-summary"><strong title="${esc(fmtInt(remaining))} Token">${fmtQuota(remaining)}</strong><span>可用 Token</span>${pendingBuckets.length ? `<span class="badge">${pendingBuckets.length} 项待生效</span>` : ''}</div>
+    ${live || pending ? `<details class="quota-details"><summary>查看 ${buckets.length + pendingBuckets.length} 项额度</summary><div class="quota-ledger">${live}${pending}</div></details>` : `<p class="quiet-message">${account.has_zcode_jwt ? account.last_balance ? '暂无生效额度' : '等待余额查询' : '网页账号不参与推理'}</p>`}`;
 }
+
 async function pageAccounts(main) {
   const [accounts, groups] = await Promise.all([api('/api/accounts'), api('/api/groups')]);
   window._accCache = accounts;
@@ -521,39 +682,44 @@ function renderAccPage(accounts, groups) {
   <section><div id="acc-table"></div></section>`;
   $('#add-btn').addEventListener('click', () => addAccountModal(groups));
   $('#accounts-refresh').addEventListener('click', () => render({ swap: true }));
-  $('#acc-q').addEventListener('input', (e) => { f.q = e.target.value; renderAccTable(); });
+  $('#acc-q').addEventListener('input', (e) => { f.q = e.target.value; f.page = 1; renderAccTable(); syncRoute(); });
   $('#acc-sort').value = f.sort || 'default';
-  $('#acc-sort').addEventListener('change', (e) => { f.sort = e.target.value; renderAccTable(); });
+  $('#acc-sort').addEventListener('change', (e) => { f.sort = e.target.value; f.page = 1; renderAccTable(); syncRoute(); });
   $('#acc-status').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-st]');
     if (!b) return;
-    f.status = b.dataset.st;
+    f.status = b.dataset.st; f.page = 1;
     $$('#acc-status button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
     renderAccTable();
+    syncRoute();
   });
   renderAccTable();
+  bindAccountPager($('#acc-table'), f, renderAccTable);
 
   function renderAccTable() {
     const list = filterAccounts(accounts, gmap, f);
     $('#acc-match-count').textContent = `${list.length} / ${accounts.length} 个账号`;
     const tbl = $('#acc-table');
-    if (!list.length) { tbl.innerHTML = `<div class="management-empty">${icon('users', 24)}<h3>${accounts.length ? '没有匹配的账号' : '添加第一个账号'}</h3><p>${accounts.length ? '尝试其他关键词，或切换账号状态。' : '通过 OAuth 授权或导入本机凭据开始使用。'}</p></div>`; return; }
-    tbl.innerHTML = `<div class="tablecard account-table"><table><colgroup><col style="width:20%"><col style="width:9%"><col style="width:32%"><col style="width:8%"><col style="width:12%"><col style="width:8%"><col style="width:11%"></colgroup>
-      <tr><th>账号</th><th>状态</th><th>模型额度 <span class="table-hint">token</span></th><th>24h 用量</th><th>套餐到期</th><th>分组</th><th>操作</th></tr>
-      ${list.map((a) => {
-        return `<tr data-acc-id="${esc(a.id)}">
-        <td data-label="账号"><div class="cell-name"><span class="avatar">${esc((a.platform_name || a.label || '?').slice(0, 1))}</span><span class="nm"><b title="${esc(a.label)}">${esc(a.platform_name || a.label)}</b><span class="account-family">${a.family === 'zai' ? 'Z.ai' : 'BigModel'}${a.platform_name && a.label !== a.platform_name ? ` · ${esc(a.label)}` : ''}</span></span></div><div class="account-id-line"><span class="mono account-platform-id">${esc(a.customer_id || '账号 ID 未获取')}</span>${a.customer_id ? `<button type="button" class="text-action" data-act="copy" data-id="${esc(a.customer_id)}" aria-label="复制账号 ID">复制</button>` : ''}</div></td>
-        <td data-label="状态"><span class="badge ${esc(a.status)}">● ${ACC_STATUS[a.status] || a.status}</span>${a.has_web_jwt ? `<br><span class="${a.web_cookie_expires_at && a.web_cookie_expires_at - Date.now() <= 7 * 86400000 ? 'error' : 'muted'}" style="font-size:11px">Cookie：${a.web_cookie_expires_at ? (a.web_cookie_expires_at <= Date.now() ? '已到期' : fmtDur(a.web_cookie_expires_at - Date.now()) + '后到期') : '到期时间未知'}</span>` : ''}${a.last_error ? `<br><span class="error" style="font-size:11px">${esc(a.last_error)}</span>` : ''}</td>
-        <td data-label="模型额度" class="account-quota-cell">${accountQuotaMarkup(a)}</td>
-        <td data-label="24h 用量" class="numeric-cell" title="${esc(fmtInt(a.delta24h))}">${fmtQuota(a.delta24h)}</td>
-        <td data-label="套餐到期"><div class="plan-expiry"><b title="${esc(a.card_expires_at ? fmtTime(a.card_expires_at) : '套餐到期时间未知')}">${esc(fmtCompactTime(a.card_expires_at))}</b>${a.card_expires_at ? `<span>${esc(fmtPlanRemaining(a.card_expires_at - Date.now()))}</span>` : ''}</div></td>
-        <td data-label="分组"><span class="group-label">${esc(gmap[a.group_id] || '待分组')}</span></td>
-        <td data-label="操作" class="account-actions"><div class="account-action-row">
-          <button class="ibtn" data-act="renew" data-id="${esc(a.id)}" aria-label="续期">${icon('refresh', 14)}<span class="tip">续期</span></button>
-          <button class="ibtn" data-act="verify" data-id="${esc(a.id)}" aria-label="验证连通性">${icon('zap', 14)}<span class="tip">验证连通性</span></button>
-          <details class="account-action-menu"><summary aria-label="更多账号操作">···</summary><div><button type="button" data-act="edit" data-id="${esc(a.id)}">${icon('pencil', 14)}编辑账号</button><button type="button" class="danger" data-act="del" data-id="${esc(a.id)}">${icon('trash', 14)}删除账号</button></div></details>
-        </div></td></tr>`;
-      }).join('')}</table></div>`;
+    if (!list.length) { f.page = 1; tbl.innerHTML = `<div class="management-empty">${icon('users', 24)}<h2>${accounts.length ? '没有匹配的账号' : '添加第一个账号'}</h2><p>${accounts.length ? '尝试其他关键词，或切换账号状态。' : '通过 OAuth 授权或导入本机凭据开始使用。'}</p></div>`; return; }
+
+    const page = UI.paginate(list, f.page, f.size || 25);
+    f.page = page.page;
+    tbl.innerHTML = `<p class="account-scroll-hint">窄屏可左右滚动查看各列，点击账号名称查看完整信息。</p><div class="tablecard account-table compact-account-table" tabindex="0" role="region" aria-label="账号管理横向列表"><table><colgroup><col class="account-name-col"><col style="width:95px"><col style="width:150px"><col style="width:115px"><col style="width:145px"><col style="width:100px"><col style="width:138px"></colgroup><thead>
+      <tr><th scope="col">账号</th><th scope="col">状态</th><th scope="col" class="align-right">可用额度 <span class="table-hint">Token</span></th><th scope="col" class="align-right" title="来自上游余额快照差额，可能包含外部客户端请求">24 小时消耗</th><th scope="col">最近到期</th><th scope="col">分组</th><th scope="col">操作</th></tr></thead><tbody>
+      ${page.items.map(a => `<tr data-acc-id="${esc(a.id)}">
+        <td>${accountNameMarkup(a)}</td>
+        <td><span class="badge ${esc(a.status)}" title="${esc(a.last_error || '')}">● ${esc(ACC_STATUS[a.status] || a.status)}</span></td>
+        <td class="align-right"><span class="account-row-quota"><strong title="${esc(fmtInt(a.remaining))} Token">${fmtQuota(a.remaining)}</strong><button type="button" class="text-action" data-act="detail" data-id="${esc(a.id)}" aria-label="查看${esc(a.platform_name || a.label)}的额度明细">明细</button>${(a.pending_buckets || []).length ? `<span class="account-pending-dot" title="${fmtQuota(a.pending_total)} Token 待生效" aria-label="有额度待生效"></span>` : ''}</span></td>
+        <td class="align-right" title="${esc(fmtInt(a.delta24h))} Token">${fmtQuota(a.delta24h)}</td>
+        <td class="account-row-expiry" title="${esc(a.card_expires_at ? fmtTime(a.card_expires_at) + '，' + fmtPlanRemaining(a.card_expires_at - Date.now()) : '到期时间未知')}">${a.card_expires_at ? esc(fmtCompactTime(a.card_expires_at)) : '未知'}</td>
+        <td><span class="account-row-group" title="${esc(gmap[a.group_id] || '待分组')}">${esc(gmap[a.group_id] || '待分组')}</span></td>
+        <td><div class="account-action-row">
+          <button class="ibtn" data-act="renew" data-id="${esc(a.id)}" aria-label="续期" title="更新账号凭据">${icon('refresh', 14)}</button>
+          <button class="ibtn" data-act="verify" data-id="${esc(a.id)}" aria-label="验证连通性" title="验证连通性">${icon('zap', 14)}</button>
+          <button class="ibtn" data-act="edit" data-id="${esc(a.id)}" aria-label="编辑账号" title="编辑账号">${icon('pencil', 14)}</button>
+          <button class="ibtn account-delete" data-act="del" data-id="${esc(a.id)}" aria-label="删除账号" title="删除账号">${icon('trash', 14)}</button>
+        </div></td></tr>`).join('')}</tbody></table></div>${accountPagerMarkup(page, [25, 50, 100])}`;
+    enhanceSelects(tbl);
     tbl.onclick = onAccountAction;
   }
 }
@@ -563,11 +729,20 @@ function btnLoading(btn, on) { btn.classList.toggle('loading', !!on); }
 async function onAccountAction(e) {
   const btn = e.target.closest('button[data-act]');
   if (!btn || btn.disabled) return;
-  btn.closest('.account-action-menu')?.removeAttribute('open');
   const id = btn.dataset.id;
   if (btn.dataset.act === 'copy') {
     try { await navigator.clipboard.writeText(id); toast('账号 ID 已复制', 'ok'); }
     catch { toast('复制失败，请手动选择账号 ID', 'err'); }
+    return;
+  }
+
+  if (btn.dataset.act === 'detail') {
+    const a = (window._accCache || []).find(item => item.id === id);
+    if (!a) { toast('账号信息已更新，请刷新列表', 'err'); return; }
+    const form = h(`<div class="account-detail"><dl><div><dt>账号名称</dt><dd>${esc(a.platform_name || a.label)}</dd></div><div><dt>备注</dt><dd>${esc(a.label)}</dd></div><div><dt>账号 ID</dt><dd>${esc(a.customer_id || '未获取')}${a.customer_id ? `<button type="button" class="text-action" data-act="copy" data-id="${esc(a.customer_id)}">复制</button>` : ''}</dd></div><div><dt>状态</dt><dd>${esc(ACC_STATUS[a.status] || a.status)}</dd></div>${a.has_web_jwt ? `<div><dt>网页会话到期</dt><dd>${esc(fmtTime(a.web_cookie_expires_at))}</dd></div>` : ''}<div><dt>最近额度卡到期</dt><dd>${esc(fmtTime(a.card_expires_at))}</dd></div></dl>${a.last_error ? `<p class="inline-notice error">${esc(a.last_error)}</p>` : ''}<section class="account-detail-quota"><h3>模型额度明细</h3>${accountQuotaMarkup(a)}</section></div>`);
+    const details = form.querySelector('.quota-details'); if (details) details.open = true;
+    form.addEventListener('click', onAccountAction);
+    modal('账号详情', form);
     return;
   }
   if (btn.dataset.act === 'del') {
@@ -763,10 +938,6 @@ function firstReason(r) {
   return '导入失败';
 }
 
-/* ---------- OAuth 授权全局回执 ----------
-   弹窗只是入口之一：用户可能关掉弹窗、切走页面甚至刷新后再完成登录。
-   服务端把「已完成且未被确认」的授权流程持久化在 oauth_flows.noticed_at，
-   这里每 5s 收割一次，保证登录成功一定有提示 + 账号库刷新。 */
 window._oauthSeen = window._oauthSeen || new Set();
 function noteFlowSeen(flowId) {
   if (!flowId || window._oauthSeen.has(flowId)) return;
@@ -776,7 +947,7 @@ function noteFlowSeen(flowId) {
 function startOauthWatcher() {
   if (window._oauthWatchTimer) clearInterval(window._oauthWatchTimer);
   window._oauthWatchTimer = setInterval(async () => {
-    // 弹窗打开时由弹窗内的 watch 负责（避免双重提示）；后台标签页与未登录时静默
+    // 弹窗自行轮询，避免重复通知。
     if (!TOKEN || document.hidden || document.querySelector('.modal-bg')) return;
     let w;
     try { w = await api('/api/accounts/oauth/watch'); } catch { return; }
@@ -794,13 +965,11 @@ function startOauthWatcher() {
   }, 5000);
 }
 
-/** 跳到账号页并高亮新入库的账号行 */
 async function viewAccount(id) {
   window._highlightAccId = id;
-  currentPage = 'accounts';
-  delete $('#main').dataset.fp;
-  renderNav();
-  try { await render(); } catch { return; }
+  window._accFilter = { q: id, status: 'all', sort: 'default' };
+  if (currentPage === 'accounts') { syncRoute(); await render(); }
+  else if (!await navigateTo('accounts')) return;
   const row = document.querySelector(`#acc-table tr[data-acc-id="${CSS.escape(id)}"]`);
   if (row) {
     row.classList.add('hl');
@@ -809,16 +978,62 @@ async function viewAccount(id) {
   }
 }
 
+function policyLabel(policy) {
+  return ({ balanced: '均衡调度', expiring_first: '临期优先', remaining_desc: '剩余额度优先' })[policy] || policy || '未指定';
+}
+
+function renderUsageChart(root, stats) {
+  const timeline = UI.usageTimeline(stats), rows = timeline.rows;
+  let selected = rows.findLastIndex(row => row.reqs > 0);
+  if (selected < 0) selected = rows.length - 1;
+  const renderChart = () => {
+    const failed = window._trendMetric === 'failed';
+    const value = row => failed ? Math.max(0, row.reqs - row.ok) : row.reqs;
+    const max = Math.max(1, ...rows.map(value));
+    const offset = Math.abs(timeline.offset), zone = `UTC${timeline.offset >= 0 ? '+' : '−'}${String(Math.floor(offset / 60)).padStart(2, '0')}:${String(offset % 60).padStart(2, '0')}`;
+    const dateLabel = row => row.bucket.slice(5).replace('T', ' ').replace(':00:00', ':00');
+    const description = row => `${dateLabel(row)}${row.partial ? '（部分时段）' : ''} · ${fmtInt(row.reqs)} 次请求 · ${fmtInt(Math.max(0, row.reqs - row.ok))} 次未成功 · ${fmtQuota(row.tokens)} Token`;
+    root.innerHTML = `<div class="usage-chart-head"><div><h3>${failed ? '未成功请求' : '请求量'}</h3><p>按${stats.time_unit === 'day' ? '天' : '小时'}统计 · ${zone}</p></div><label class="chart-metric">指标<select id="trend-metric" aria-label="趋势指标"><option value="requests">请求量</option><option value="failed">未成功请求</option></select></label></div>
+      <div class="chart-frame"><div class="chart-scale" aria-hidden="true"><span>${fmtInt(max)}</span><span>${fmtInt(Math.round(max / 2))}</span><span>0</span></div><div class="chart-plot" style="--chart-count:${rows.length}" role="group" aria-label="连续时间轴上的${failed ? '未成功请求量' : '请求量'}">${rows.map((row, i) => `<button type="button" class="chart-column${i === selected ? ' selected' : ''}${failed ? ' failed' : ''}" data-trend-index="${i}" tabindex="${i === selected ? '0' : '-1'}" aria-label="${esc(description(row))}" aria-pressed="${i === selected}"><span class="chart-bar" style="height:${value(row) / max * 100}%"></span><span class="chart-dot"></span></button>`).join('')}</div></div>
+      <div class="chart-axis" aria-hidden="true"><span>${dateLabel(rows[0])}</span><span>${dateLabel(rows[Math.floor(rows.length / 2)])}</span><span>${dateLabel(rows.at(-1))}</span></div>
+      <p class="chart-selection" role="status" aria-live="polite">${description(rows[selected])}</p><p class="quiet-message">${rows.some(row => row.reqs) ? '' : '所选范围内暂无请求。'}无记录的时段按 0 次展示；范围首尾可能仅包含部分时段。悬停、聚焦或点击柱形查看详情。</p>`;
+    $('#trend-metric', root).value = failed ? 'failed' : 'requests';
+    $('#trend-metric', root).addEventListener('change', e => { window._trendMetric = e.target.value; renderChart(); enhanceSelects(root); $('#trend-metric', root)?.parentElement.querySelector('.select-trigger')?.focus(); });
+    const show = event => {
+      const button = event.target.closest('[data-trend-index]');
+      if (!button) return;
+      selected = Number(button.dataset.trendIndex);
+      root.querySelectorAll('[data-trend-index]').forEach((b, i) => { b.classList.toggle('selected', i === selected); b.setAttribute('aria-pressed', String(i === selected)); b.tabIndex = i === selected ? 0 : -1; });
+      $('.chart-selection', root).textContent = description(rows[selected]);
+    };
+    root.onmouseover = show; root.onfocusin = show; root.onclick = show;
+    root.onkeydown = event => {
+      if (!event.target.matches('[data-trend-index]') || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const index = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : Math.max(0, Math.min(rows.length - 1, selected + (event.key === 'ArrowRight' ? 1 : -1)));
+      root.querySelector(`[data-trend-index="${index}"]`)?.focus();
+    };
+  };
+  renderChart();
+}
+
+function mobileLogCards(rows) {
+  return `<div class="log-mobile">${rows.map(r => `<details class="mobile-log"><summary><span class="mobile-log-heading"><strong>${esc(r.model || '未知模型')}</strong><span class="badge ${r.status === 'success' ? 'ok' : r.status === 'busy' ? 'busy' : 'err'}">${r.status === 'success' ? '成功' : r.status === 'busy' ? '忙碌' : '失败'}</span></span><span class="mobile-log-time">${esc(fmtCompactTime(r.ts))}<span>查看详情</span></span></summary><dl>
+    <div><dt>账号</dt><dd>${esc(r.account_label || r.account_id || '未分配')}</dd></div><div><dt>密钥</dt><dd>${esc(r.key_name || r.key_id || '—')}</dd></div>
+    <div><dt>思考档位</dt><dd>${esc(({ low: '低', high: '高', max: '最高' })[r.reasoning_level] || r.reasoning_level || '未指定')}</dd></div><div><dt>尝试次数</dt><dd>${fmtInt(r.attempt_count)}</dd></div>
+    <div><dt>首 Token 时间</dt><dd>${r.ttft_ms == null ? '—' : fmtInt(r.ttft_ms) + ' ms'}</dd></div><div><dt>Token 用量</dt><dd>${fmtInt((r.tokens_in || 0) + (r.tokens_out || 0))}</dd></div>
+    ${r.error_message ? `<div class="log-error-detail"><dt>错误详情</dt><dd>${esc(r.error_message)}</dd></div>` : ''}</dl></details>`).join('')}</div>`;
+}
+
 async function pageUsage(main) {
   const s = await api('/api/usage/stats?hours=' + (window._usageHours || 24));
   const sum = (field) => s.byHour.reduce((total, row) => total + (Number(row[field]) || 0), 0);
   const requests = sum('reqs'), success = sum('ok'), input = sum('tin'), output = sum('tout');
-  const maxReq = Math.max(1, ...s.byHour.map((row) => Number(row.reqs) || 0));
   const categories = {
-    model: { label: '模型', columns: ['模型', '请求', 'Tokens'], rows: s.byModel.map((r) => `<tr><td>${esc(r.model || '未知')}</td><td>${fmtInt(r.reqs)}</td><td class="mono">${fmtInt((r.tin || 0) + (r.tout || 0))}</td></tr>`) },
-    key: { label: '密钥', columns: ['密钥', '请求', 'Tokens'], rows: s.byKey.map((r) => `<tr><td>${esc(r.name || r.key_id || '匿名')}</td><td>${fmtInt(r.reqs)}</td><td class="mono">${fmtInt(r.tokens || 0)}</td></tr>`) },
-    account: { label: '账号', columns: ['账号', '请求', '成功', 'Busy', 'Tokens'], rows: s.byAccount.map((r) => `<tr><td>${esc(r.label || r.account_id || '未分配')}</td><td>${fmtInt(r.reqs)}</td><td>${fmtInt(r.ok || 0)}</td><td>${fmtInt(r.busy || 0)}</td><td class="mono">${fmtInt(r.tokens || 0)}</td></tr>`) },
-    status: { label: '状态', columns: ['状态', '次数'], rows: s.byStatus.map((r) => `<tr><td>${esc(r.status || '未知')}</td><td>${fmtInt(r.n)}</td></tr>`) },
+    model: { label: '模型', columns: ['模型', '请求数', 'Token 用量'], rows: s.byModel.map((r) => `<tr><td>${esc(r.model || '未知')}</td><td>${fmtInt(r.reqs)}</td><td class="mono">${fmtInt((r.tin || 0) + (r.tout || 0))}</td></tr>`) },
+    key: { label: '密钥', columns: ['密钥', '请求数', 'Token 用量'], rows: s.byKey.map((r) => `<tr><td>${esc(r.name || r.key_id || '匿名')}</td><td>${fmtInt(r.reqs)}</td><td class="mono">${fmtInt(r.tokens || 0)}</td></tr>`) },
+    account: { label: '账号', columns: ['账号', '请求数', '成功', '忙碌', 'Token 用量'], rows: s.byAccount.map((r) => `<tr><td>${esc(r.label || r.account_id || '未分配')}</td><td>${fmtInt(r.reqs)}</td><td>${fmtInt(r.ok || 0)}</td><td>${fmtInt(r.busy || 0)}</td><td class="mono">${fmtInt(r.tokens || 0)}</td></tr>`) },
+    status: { label: '状态', columns: ['状态', '次数'], rows: s.byStatus.map((r) => `<tr><td>${esc(({ success: '成功', busy: '忙碌', error: '失败' })[r.status] || r.status || '未知')}</td><td>${fmtInt(r.n)}</td></tr>`) },
   };
   const detailState = window._usageDetail || (window._usageDetail = { tab: 'model', pages: {} });
   if (!categories[detailState.tab]) detailState.tab = 'model';
@@ -826,19 +1041,14 @@ async function pageUsage(main) {
   ${pagehead('用量统计', '统计本项目网关的请求记录，不包含客户端直接发起的请求。',
     `<select id="u-hours" class="round" aria-label="统计时间范围"><option value="24">近 24 小时</option><option value="168">近 7 天</option><option value="720">近 30 天</option></select><button class="btn" id="usage-refresh">${icon('refresh', 14)}刷新</button>`)}
   <section><div class="cards multicol usage-summary">
-    ${statcard('请求数', fmtInt(requests), { tone: 'info', icon: 'activity' })}
+    ${statcard('请求数', fmtInt(requests), { tone: 'neutral', icon: 'activity' })}
     ${statcard('成功率', requests ? `${(success / requests * 100).toFixed(1)}%` : '—', { tone: 'success', icon: 'shield', hint: `${fmtInt(success)} 次成功` })}
-    ${statcard('Token 用量', fmtInt(input + output), { tone: 'accent', icon: 'zap', hint: `输入 ${fmtInt(input)} · 输出 ${fmtInt(output)}` })}
+    ${statcard('Token 用量', fmtInt(input + output), { tone: 'neutral', icon: 'zap', hint: `输入 ${fmtInt(input)} · 输出 ${fmtInt(output)}` })}
     ${statcard('首 Token 时间 P50 / P95', s.ttft ? `${fmtInt(s.ttft.p50)}<small> / ${fmtInt(s.ttft.p95)} ms</small>` : '—', { icon: 'timer', hint: '仅统计成功请求' })}
   </div></section>
-  <section><div class="usage-heading"><h2>${icon('trending', 15)} 请求趋势</h2><span class="muted">${s.time_unit === 'day' ? '按天' : '按小时'} · 仅显示有记录的时段</span></div>
-    ${s.byHour.length ? `<div class="usage-trend">${s.byHour.map((r) => {
-      const label = String(r.bucket || '未知时段').replace('T', ' ').replace(':00:00', ':00');
-      const description = `${label}：${fmtInt(r.reqs)} 次请求，${fmtInt((r.tin || 0) + (r.tout || 0))} tokens`;
-      return `<div class="usage-trend-row" title="${esc(description)}" aria-label="${esc(description)}"><span class="usage-period mono">${esc(label)}</span><span class="usage-track"><i style="width:${Math.max(0, Math.min(100, (Number(r.reqs) || 0) / maxReq * 100))}%"></i></span><span class="usage-count">${fmtInt(r.reqs)}</span></div>`;
-    }).join('')}</div>` : '<div class="usage-empty usage-trend">所选时间范围内暂无请求记录</div>'}
-  </section>
+  <section><div class="usage-heading"><h2>${icon('trending', 15)}请求趋势</h2><span class="muted">按完整时间轴展示</span></div><div id="usage-chart" class="usage-chart"></div></section>
   <section><h2>${icon('layers', 15)} 用量明细</h2><div id="usage-detail"></div></section>`;
+  renderUsageChart($('#usage-chart', main), s);
   const detail = $('#usage-detail', main);
   const renderDetail = (focusTab = false) => {
     const { tab, pages } = detailState;
@@ -857,6 +1067,8 @@ async function pageUsage(main) {
         ${rows.length ? `<div class="tablecard"><table><thead><tr>${current.columns.map((col) => `<th>${col}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '<p class="usage-empty">所选分类暂无数据</p>'}
         <div class="pager usage-pager" aria-label="用量明细分页"><button type="button" data-usage-page="prev" aria-label="上一页" ${page === 1 ? 'disabled' : ''}>‹</button>${pageNumbers.map((n) => n === '…' ? '<span aria-hidden="true">…</span>' : `<button type="button" data-usage-page="${n}" aria-label="第 ${n} 页" ${n === page ? 'class="cur" aria-current="page"' : ''}>${n}</button>`).join('')}<button type="button" data-usage-page="next" aria-label="下一页" ${page === pageCount ? 'disabled' : ''}>›</button><span class="pinfo">共 ${fmtInt(total)} 条</span></div>
       </div>`;
+    enhanceTables(detail);
+    syncRoute();
     if (focusTab) detail.querySelector(`[data-usage-tab="${tab}"]`)?.focus();
   };
   detail.addEventListener('click', (e) => {
@@ -889,7 +1101,7 @@ async function pageKeys(main) {
   ${pagehead('API 密钥', '对外反代网关的分发密钥：Bearer / x-api-key 鉴权 · 配额与白名单 · 密钥级默认思考档位',
     `<button class="btn primary" id="add-key">${icon('plus', 14)}新建密钥</button>`)}
   <section style="animation-delay:50ms"><div id="key-table" class="fade-up"></div>
-  <p class="muted" style="margin:0">接入示例：<code>Authorization: Bearer &lt;密钥&gt;</code> → <code>POST http://127.0.0.1:${RUNTIME?.gateway_port}/v1/chat/completions</code>（OpenAI）或 <code>/v1/messages</code>（Anthropic）</p></section>`;
+  <p class="muted example-line" style="margin:0">接入示例：<code>Authorization: Bearer &lt;密钥&gt;</code> → <code>POST http://127.0.0.1:${RUNTIME?.gateway_port}/v1/chat/completions</code>（OpenAI）或 <code>/v1/messages</code>（Anthropic）<button type="button" class="text-action" id="copy-gw">复制网关地址</button></p></section>`;
   $('#key-table').innerHTML = keys.length ? `<div class="tablecard"><table>
     <tr><th>名称</th><th>尾号</th><th>配额</th><th>已用</th><th>分组链</th><th>默认档位</th><th>白名单</th><th>状态</th><th>操作</th></tr>
     ${keys.map((k) => `<tr>
@@ -897,16 +1109,15 @@ async function pageKeys(main) {
       <td class="mono">…${esc(k.key_tail)}</td>
       <td class="mono">${k.quota_limit === null ? '不限' : fmtInt(k.quota_limit)}</td>
       <td class="mono">${fmtInt(k.used_units)}</td>
-      <td style="font-size:11px">${(k.group_order || []).join(' → ') || '默认链'}</td>
-      <td>${k.default_level ? `<span class="badge">${esc(k.default_level)}</span>` : '<span class="muted">全局</span>'}</td>
+      <td style="font-size:12px">${esc((k.group_order || []).join(' → ') || '默认链')}</td>
+      <td>${k.default_level ? `<span class="badge">${esc(({ low: '低', high: '高', max: '最高' })[k.default_level] || k.default_level)}</span>` : '<span class="muted">跟随全局</span>'}</td>
       <td style="font-size:11px">${k.model_whitelist.length ? k.model_whitelist.map((m) => `<span class="badge sm">${esc(m)}</span>`).join(' ') : '全部模型'}${k.ip_whitelist.length ? '<br>IP: ' + esc(k.ip_whitelist.join(',')) : ''}</td>
       <td>${k.enabled ? '<span class="ok-text">● 启用</span>' : '<span class="muted">禁用</span>'}</td>
       <td><div class="row" style="gap:6px;justify-content:flex-end"><button class="btn" style="height:28px;padding:0 10px;font-size:12px" data-edit="${esc(k.id)}">编辑</button><button class="btn danger" style="height:28px;padding:0 10px;font-size:12px" data-del="${esc(k.id)}">删除</button></div></td></tr>`).join('')}
   </table></div>` : '<p class="muted">还没有密钥。</p>';
   $('#key-table').addEventListener('click', async (e) => {
     const del = e.target.closest('button[data-del]');
-    const edit = e.target.closest('button[data-edit]');
-    if (del) {
+    const edit = e.target.closest('button[data-edit]');    if (del) {
       if (!await confirmAction('删除密钥', '确定删除该密钥？使用此密钥的客户端将无法继续访问。')) return;
       try {
         await api(`/api/keys/${del.dataset.del}`, { method: 'DELETE' });
@@ -949,6 +1160,12 @@ async function pageKeys(main) {
       });
     }
   });
+  $('#copy-gw').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(`http://127.0.0.1:${RUNTIME?.gateway_port}/v1`);
+      toast('网关地址已复制', 'ok');
+    } catch { toast('复制失败，请手动复制', 'err'); }
+  });
   $('#add-key').addEventListener('click', () => {
     const form = h(`<form class="dialog-form"><p class="dialog-intro">为使用网关的客户端创建独立密钥，方便管理用量与访问权限。</p><label class="dialog-field">密钥名称<input name="name" maxlength="80" placeholder="例如：Claude Code" required></label><p class="dialog-error error" role="alert"></p><div class="modal-actions"><button type="button" class="btn" data-cancel>取消</button><button type="submit" class="btn primary">创建密钥</button></div></form>`);
     const m = modal('新建密钥', form);
@@ -983,13 +1200,13 @@ async function pageKeys(main) {
 async function pageGroups(main) {
   const groups = await api('/api/groups');
   main.innerHTML = `
-  ${pagehead('分组调度链', '分组按顺序调度 · 策略决定账号排序（primary 主力 / backup 兜底）',
+  ${pagehead('分组调度链', '按分组顺序选择账号池，再根据各组策略选择账号。',
     `<button class="btn primary" id="add-group">${icon('plus', 14)}新建分组</button>`)}
   <section id="group-list" style="animation-delay:50ms">
-  ${groups.length ? `<div class="tablecard fade-up"><table><tr><th>名称</th><th>角色</th><th>族过滤</th><th>策略</th><th>临期窗口</th><th>操作</th></tr>
+  ${groups.length ? `<div class="tablecard fade-up"><table><tr><th>名称</th><th>角色</th><th>账号类型</th><th>调度策略</th><th>临期窗口</th><th>操作</th></tr>
     ${groups.map((g) => `<tr><td><div class="cell-name"><span class="avatar">${esc((g.name || '?').slice(0, 1))}</span><span class="nm"><b>${esc(g.name)}</b></span></div></td>
-      <td><span class="badge ${g.role === 'primary' ? 'active' : ''}">${esc(g.role)}</span></td><td>${esc(g.family_filter || '混合')}</td>
-      <td class="mono">${esc(g.policy)}</td><td>${g.urgent_window_min} 分</td>
+      <td><span class="badge ${g.role === 'primary' ? 'active' : ''}">${esc(({ primary: '主力', backup: '备用' })[g.role] || g.role)}</span></td><td>${esc(({ zai: 'Z.ai', bigmodel: 'BigModel' })[g.family_filter] || g.family_filter || '全部类型')}</td>
+      <td>${esc(policyLabel(g.policy))}</td><td>${g.urgent_window_min} 分钟</td>
       <td><div class="row" style="justify-content:flex-end"><button class="btn danger" style="height:28px;padding:0 10px;font-size:12px" data-del="${esc(g.id)}">删除</button></div></td></tr>`).join('')}</table></div>`
     : '<p class="muted">暂无分组。</p>'}</section>`;
   $('#add-group').addEventListener('click', () => {
@@ -1028,55 +1245,110 @@ async function pageGroups(main) {
 
 async function pageSettings(main) {
   const s = await api('/api/settings');
-  main.innerHTML = `
-  ${pagehead('设置', '保存即热更新 · 端口在 config.json 固定')}
-  <section style="animation-delay:50ms">
-    <div class="formcard fade-up"><h3>运行设置</h3>
-    <div class="fieldgrid">
-      <label class="f">外观<select id="s-theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label>
-      <label class="f">推理通道<input value="HTTP 直连" readonly></label>
-      <label class="f">轮询间隔(秒)<input id="s-poll" type="number" value="${s.poll_interval_sec}"></label>
-      <label class="f">抖动(秒)<input id="s-jitter" type="number" value="${s.poll_jitter_sec}"></label>
-      <label class="f">轮询并发<input id="s-conc" type="number" value="${s.poll_concurrency}"></label>
-      <label class="f">默认思考档位<select id="s-level"><option value="low" ${s.default_reasoning_level === 'low' ? 'selected' : ''}>low（最快）</option><option value="high" ${s.default_reasoning_level === 'high' ? 'selected' : ''}>high（深思）</option><option value="max" ${s.default_reasoning_level === 'max' ? 'selected' : ''}>max</option></select></label>
-      <label class="f">客户端版本<input id="s-ver" value="${esc(s.app_version)}"></label>
-      <label class="f check">自动领卡<input id="s-claim" type="checkbox" ${s.claim_auto_enabled ? 'checked' : ''}> 周期(分)<input id="s-claimmin" type="number" value="${s.claim_auto_min}" style="width:76px"></label>
-    </div>
-    <p class="muted" style="margin:0">模型别名（JSON）：</p>
-    <textarea id="s-aliases" style="min-height:56px">${esc(JSON.stringify(s.aliases, null, 2))}</textarea>
-    <p class="muted" style="margin:0">重试参数（JSON）：</p>
-    <textarea id="s-retry" style="min-height:120px">${esc(JSON.stringify(s.retry, null, 2))}</textarea>
-    <p class="muted" style="margin:0">限流先换号，全池限流后重试 10 秒，不限次数。HTTP 超时（毫秒；total_timeout_ms 为 0 表示不限制整轮时长）：</p>
-    <textarea id="s-http" style="min-height:100px">${esc(JSON.stringify(s.http, null, 2))}</textarea>
-    <div class="foot"><button class="btn primary" id="s-save">保存</button></div></div>
-  </section>
-  <section>
-    <div class="formcard"><h3>${icon('plug', 14)} 端口</h3>
-    <p class="muted" style="margin:0">Web ${RUNTIME?.web_port ?? s.web_port} · 网关 ${RUNTIME?.gateway_port ?? s.gateway_port} —— 要固定端口，在项目根目录 config.json 配置 web_port / gateway_port（0=随机）后重启</p>
-  </div>
-  </section>
-  `;
+  const httpParams = { ...s.http };
+  delete httpParams.client_version;
+  main.innerHTML = `${pagehead('设置', '运行参数保存后即时生效，外观修改立即应用。')}
+    <form id="settings-form" class="settings-form" novalidate>
+      <section class="settings-panel formcard"><div><h2>外观</h2><p>选择适合当前环境的显示方式。</p></div><label class="f">主题<select id="s-theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select><small>立即应用，无需保存</small></label></section>
+      <section class="settings-panel formcard"><div><h2>额度轮询</h2><p>控制账号余额与状态的自动同步。</p></div><div class="settings-fields">
+        <label class="f">轮询间隔（秒）<input id="s-poll" type="number" min="1" step="1" required value="${s.poll_interval_sec}"><small>两次余额检查之间的基础间隔</small></label>
+        <label class="f">随机抖动（秒）<input id="s-jitter" type="number" min="0" step="1" required value="${s.poll_jitter_sec}"><small>分散多个账号的请求时间</small></label>
+        <label class="f">轮询并发<input id="s-conc" type="number" min="1" step="1" required value="${s.poll_concurrency}"><small>同时检查余额的账号数量</small></label>
+      </div></section>
+      <section class="settings-panel formcard"><div><h2>自动领卡</h2><p>定期检查并领取账号可用的额度卡。</p></div><div class="settings-fields">
+        <label class="settings-check"><input id="s-claim" type="checkbox" ${s.claim_auto_enabled ? 'checked' : ''}><span>启用自动领卡<small>仅领取上游实际提供的额度卡</small></span></label>
+        <label class="f">检查周期（分钟）<input id="s-claimmin" type="number" min="1" step="1" required value="${s.claim_auto_min}"><small>关闭自动领卡后不会按此周期执行</small></label>
+      </div></section>
+      <section class="settings-panel formcard"><div><h2>网关与模型</h2><p>作为未指定思考档位的客户端请求的默认值。</p></div><label class="f">默认思考档位<select id="s-level"><option value="low">低（更快）</option><option value="high">高（深入思考）</option><option value="max">最高</option></select><small>请求自身指定的档位优先</small></label>
+        <details class="adv-box"><summary>高级参数：客户端版本、模型别名、重试与 HTTP 超时</summary><div class="advanced-fields">
+          <label class="f">额度与领卡 API 版本<input id="s-ver" value="${esc(s.app_version)}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 3.16.2" required><small>用于管理请求的 User-Agent、X-ZCode-App-Version 和 app_version 参数。</small></label>
+          <label class="f">推理 API 版本<input id="s-http-version" value="${esc(s.http.client_version || '0.17.0')}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 0.17.0" required><small>对应 http.client_version，仅调整推理请求的版本标识。</small></label>
+          <p class="inline-notice client-version-note">当前使用 Go HTTP 传输，版本字段不等于官方客户端的完整指纹。版本设置不改变 TLS、设备标识或系统前缀，不能保证避免平台风控。现有设备标识在账号入库后保留；风险拒绝会停止本次请求，不自动换号重试。</p>
+          <label class="f" for="s-aliases">模型别名（JSON 对象）</label><textarea id="s-aliases" class="code-input" spellcheck="false" rows="5" aria-describedby="s-aliases-hint">${esc(JSON.stringify(s.aliases, null, 2))}</textarea><p id="s-aliases-hint" class="json-hint" data-for="s-aliases" aria-live="polite"></p>
+          <label class="f" for="s-retry">重试参数（JSON 对象）</label><textarea id="s-retry" class="code-input" spellcheck="false" rows="8" aria-describedby="s-retry-hint">${esc(JSON.stringify(s.retry, null, 2))}</textarea><p id="s-retry-hint" class="json-hint" data-for="s-retry" aria-live="polite"></p>
+          <label class="f" for="s-http">HTTP 超时（JSON 对象，毫秒）<small>total_timeout_ms 为 0 表示不限制整轮时长；client_version 使用上方“推理 API 版本”设置。</small></label><textarea id="s-http" class="code-input" spellcheck="false" rows="6" aria-describedby="s-http-hint">${esc(JSON.stringify(httpParams, null, 2))}</textarea><p id="s-http-hint" class="json-hint" data-for="s-http" aria-live="polite"></p>
+        </div></details>
+      </section>
+      <div class="settings-savebar"><div><p id="settings-state" role="status" aria-live="polite"></p><button type="button" class="text-action hidden" id="s-discard">放弃修改</button></div><button type="submit" class="btn primary" id="s-save">保存设置</button></div>
+      <p id="settings-error" class="inline-notice error hidden" role="alert"></p>
+    </form>
+    <p class="muted settings-ports">管理端口 ${RUNTIME?.web_port ?? s.web_port} · 网关端口 ${RUNTIME?.gateway_port ?? s.gateway_port}。端口修改需编辑 config.json 后重启服务。</p>`;
+  const form = $('#settings-form'), save = $('#s-save'), status = $('#settings-state'), discard = $('#s-discard');
   $('#s-theme').value = localStorage.getItem('z2a_theme') || 'system';
-  $('#s-theme').addEventListener('change', (e) => setTheme(e.target.value));
-  $('#s-save').addEventListener('click', async (e) => {
-    const btn = e.target.closest('button');
-    btnLoading(btn, true);
-    try {
-      const body = {
-        poll_interval_sec: Number($('#s-poll').value), poll_jitter_sec: Number($('#s-jitter').value),
-        poll_concurrency: Number($('#s-conc').value), claim_auto_enabled: $('#s-claim').checked,
-        claim_auto_min: Number($('#s-claimmin').value),
-        default_reasoning_level: $('#s-level').value,
-        app_version: $('#s-ver').value,
-        inference_driver: 'http', http: JSON.parse($('#s-http').value),
-        aliases: JSON.parse($('#s-aliases').value), retry: JSON.parse($('#s-retry').value),
-      };
-      await api('/api/settings', { method: 'PUT', body });
-      toast('已保存并热更新', 'ok');
-    } catch (err) { toast('保存失败：' + err.message, 'err'); }
-    btnLoading(btn, false);
+  $('#s-theme').addEventListener('change', e => setTheme(e.target.value));
+  $('#s-level').value = s.default_reasoning_level;
+  const ids = ['s-poll', 's-jitter', 's-conc', 's-claim', 's-claimmin', 's-level', 's-ver', 's-http-version', 's-aliases', 's-retry', 's-http'];
+  const values = () => Object.fromEntries(ids.map(id => [id, $('#' + id).type === 'checkbox' ? $('#' + id).checked : $('#' + id).value]));
+  const apply = data => ids.forEach(id => { if (Object.hasOwn(data, id)) { const input = $('#' + id); if (input.type === 'checkbox') input.checked = !!data[id]; else input.value = data[id]; syncSelect(input); } });
+  let original = values(), fingerprint = JSON.stringify(original), savedAt = '';
+  const draftKey = 'z2a_settings_draft';
+  const updateDirty = () => {
+    settingsDirty = JSON.stringify(values()) !== fingerprint;
+    discard.classList.toggle('hidden', !settingsDirty);
+    save.disabled = !settingsDirty || settingsSaving;
+    status.textContent = settingsSaving ? '正在保存…' : settingsDirty ? '有未保存修改 · 草稿已保留在当前标签页' : savedAt || '所有设置已保存';
+    status.classList.toggle('warn-text', settingsDirty);
+    try { if (settingsDirty) sessionStorage.setItem(draftKey, JSON.stringify(values())); else sessionStorage.removeItem(draftKey); }
+    catch { if (settingsDirty) status.textContent = '有未保存修改 · 浏览器暂时无法保存草稿，请及时保存'; }
+  };
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+    if (draft && typeof draft === 'object' && !Array.isArray(draft)) {
+      try {
+        const oldHttp = JSON.parse(draft['s-http']);
+        if (oldHttp && Object.hasOwn(oldHttp, 'client_version') && !Object.hasOwn(draft, 's-http-version')) {
+          draft['s-http-version'] = String(oldHttp.client_version); delete oldHttp.client_version; draft['s-http'] = JSON.stringify(oldHttp, null, 2);
+        }
+      } catch { }
+      apply(draft);
+    }
+  } catch { }
+  const validateJSON = () => {
+    let valid = true;
+    for (const id of ['s-aliases', 's-retry', 's-http']) {
+      const box = $('#' + id), hint = $(`.json-hint[data-for="${id}"]`);
+      try {
+        const parsed = JSON.parse(box.value);
+        if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('请输入 JSON 对象，而非数组或其他值');
+        if (id === 's-http' && Object.hasOwn(parsed, 'client_version')) throw new Error('请在上方“推理 API 版本”字段设置 client_version，并从此处移除该键');
+        box.classList.remove('invalid'); box.setAttribute('aria-invalid', 'false'); hint.textContent = ''; hint.classList.remove('error');
+      } catch (error) {
+        valid = false; box.classList.add('invalid'); box.setAttribute('aria-invalid', 'true'); hint.textContent = '配置格式错误：' + error.message; hint.classList.add('error');
+      }
+    }
+    return valid;
+  };
+  form.addEventListener('input', e => { if (ids.includes(e.target.id)) { validateJSON(); updateDirty(); } });
+  form.addEventListener('change', e => { if (ids.includes(e.target.id)) updateDirty(); });
+  discard.addEventListener('click', async () => {
+    if (!await confirmAction('放弃未保存修改', '当前设置草稿将被清除，恢复到上次保存的值。', '放弃修改')) return;
+    apply(original); validateJSON(); updateDirty();
   });
-
+  validateJSON(); updateDirty();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (settingsSaving || !settingsDirty) return;
+    const error = $('#settings-error'); error.classList.add('hidden');
+    if (!validateJSON()) { $('.adv-box', form).open = true; $('.invalid', form)?.focus(); return; }
+    const invalidField = form.querySelector(':invalid');
+    const invalidSection = invalidField?.closest('details');
+    if (invalidSection) invalidSection.open = true;
+    if (!form.reportValidity()) return;
+    const submitted = values();
+    settingsSaving = true; btnLoading(save, true); updateDirty();
+    try {
+      const response = await api('/api/settings', { method: 'PUT', body: {
+        poll_interval_sec: Number(submitted['s-poll']), poll_jitter_sec: Number(submitted['s-jitter']), poll_concurrency: Number(submitted['s-conc']),
+        claim_auto_enabled: submitted['s-claim'], claim_auto_min: Number(submitted['s-claimmin']), default_reasoning_level: submitted['s-level'], app_version: submitted['s-ver'],
+        inference_driver: 'http', http: { ...JSON.parse(submitted['s-http']), client_version: submitted['s-http-version'] }, aliases: JSON.parse(submitted['s-aliases']), retry: JSON.parse(submitted['s-retry']),
+      } });
+      if (response.ok === false) throw new Error(response.error || '保存失败');
+      original = submitted; fingerprint = JSON.stringify(submitted);
+      savedAt = '已保存并生效 · ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
+      toast('设置已保存并生效', 'ok');
+    } catch (err) { error.textContent = '保存失败，修改已保留：' + err.message; error.classList.remove('hidden'); }
+    finally { settingsSaving = false; btnLoading(save, false); updateDirty(); }
+  });
 }
 
 const LOG_PAGE_SIZE = 10;
@@ -1155,16 +1427,15 @@ async function pageLogs(main) {
   const audView = aud.slice((ap - 1) * LOG_PAGE_SIZE, ap * LOG_PAGE_SIZE);
   const hourLabel = { all: '全部时间', 24: '近 24 小时', 168: '近 7 天', 720: '近 30 天' };
 
-  /* 顶部胶囊 Tab（参考站 账号|任务 形态），带计数徽标 */
   const tabsHtml = `<nav class="section-tabs fade-up" style="animation-delay:50ms" role="tablist" aria-label="日志分区">
     ${[['logs', '调用记录', 'scroll', F.length], ['sched', '调度时间线', 'timer', sched.length], ['audit', '审计', 'shield', aud.length]]
       .map(([id, label, ic, n]) => `<button type="button" class="tab${tab === id ? ' active' : ''}" data-ltab="${id}" role="tab" id="log-tab-${id}" aria-controls="log-panel" aria-selected="${tab === id}" tabindex="${tab === id ? '0' : '-1'}">${icon(ic, 13)}${label}<span class="cnt">${n}</span></button>`).join('')}
   </nav>`;
 
   const emptyBox = (ic, text) => `<div class="empty">${icon(ic, 22)}<span>${text}</span></div>`;
-  const statusBadge = (s) => s === 'success' ? '<span class="badge ok">success</span>'
-    : s === 'busy' ? '<span class="badge busy">busy</span>'
-    : `<span class="badge err">${esc(s || 'error')}</span>`;
+  const statusBadge = (s) => s === 'success' ? '<span class="badge ok">成功</span>'
+    : s === 'busy' ? '<span class="badge busy">忙碌</span>'
+    : `<span class="badge err">${s === 'error' ? '失败' : esc(s || '失败')}</span>`;
 
   let body = '';
   if (tab === 'logs') {
@@ -1174,9 +1445,9 @@ async function pageLogs(main) {
         <select id="lf-hours" class="round" aria-label="时间范围">${Object.entries(hourLabel).map(([v, l]) => `<option value="${v}" ${f.hours === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <select id="lf-status" class="round" aria-label="状态筛选">
           <option value="all" ${f.status === 'all' ? 'selected' : ''}>全部状态</option>
-          <option value="success" ${f.status === 'success' ? 'selected' : ''}>success</option>
-          <option value="busy" ${f.status === 'busy' ? 'selected' : ''}>busy</option>
-          <option value="error" ${f.status === 'error' ? 'selected' : ''}>error</option>
+          <option value="success" ${f.status === 'success' ? 'selected' : ''}>成功</option>
+          <option value="busy" ${f.status === 'busy' ? 'selected' : ''}>忙碌</option>
+          <option value="error" ${f.status === 'error' ? 'selected' : ''}>失败</option>
         </select>
         <select id="lf-model" class="round" aria-label="模型筛选">
           <option value="all" ${f.model === 'all' ? 'selected' : ''}>全部模型</option>
@@ -1185,22 +1456,22 @@ async function pageLogs(main) {
         <div class="spacer"></div>
         <button class="btn" id="lf-reset">${icon('refresh', 14)}重置</button>
       </div>
-      <div class="cards multicol">
-        ${statcard('调用总数', fmtInt(F.length), { tone: 'neutral', icon: 'scroll' })}
-        ${statcard('成功 / busy', `${okN}<small> / ${busyN}</small>`, { tone: 'success', icon: 'shield' })}
-        ${statcard('失败', fmtInt(errN), { tone: errN ? 'danger' : 'neutral', icon: 'zap' })}
-        ${statcard('TTFT P50', p50 !== null ? `${p50}<small> ms</small>` : '—', { tone: 'info', icon: 'timer' })}
-        ${statcard('Token 消耗', fmtInt(tok), { tone: 'accent', icon: 'activity' })}
+      <div class="overview-strip logs-strip">
+        <div><span>调用总数</span><strong>${fmtInt(F.length)}</strong></div>
+        <div><span>成功 / 忙碌</span><strong class="tone-success">${okN}<small> / ${busyN}</small></strong></div>
+        <div><span>失败</span><strong class="${errN ? 'tone-danger' : ''}">${fmtInt(errN)}</strong></div>
+        <div><span>首 Token 时间 P50</span><strong>${p50 !== null ? `${fmtInt(p50)}<small> ms</small>` : '—'}</strong></div>
+        <div><span>Token 消耗</span><strong title="${esc(fmtInt(tok))}">${fmtInt(tok)}</strong></div>
       </div>
     </section>
     <section class="fade-up" style="animation-delay:150ms">
-      ${F.length ? `<div class="tablecard"><table><colgroup><col style="width:118px"><col style="width:104px"><col style="width:12%"><col style="width:15%"><col style="width:74px"><col style="width:40px"><col style="width:64px"><col style="width:72px"><col style="width:22%"></colgroup>
-        <tr><th>时间</th><th>密钥</th><th>账号</th><th>模型</th><th>状态</th><th>尝试</th><th>TTFT</th><th>tokens</th><th>错误</th></tr>
+      ${F.length ? `<div class="tablecard log-desktop"><table><colgroup><col style="width:118px"><col style="width:96px"><col style="width:15%"><col style="width:15%"><col style="width:74px"><col style="width:40px"><col style="width:64px"><col style="width:76px"><col style="width:19%"></colgroup>
+        <tr><th>时间</th><th>密钥</th><th>账号</th><th>模型</th><th>状态</th><th>尝试</th><th>首 Token（ms）</th><th>Token 用量</th><th>错误</th></tr>
         ${logsView.map((r) => `<tr><td class="mono" style="white-space:nowrap">${fmtTime(r.ts)}</td><td>${esc(r.key_name || r.key_id || '—')}</td><td>${esc(r.account_label || r.account_id || '—')}</td>
           <td class="mono" style="color:var(--foreground)">${esc(r.model)}${r.reasoning_level ? ` <span class="badge sm">${esc(r.reasoning_level)}</span>` : ''}</td>
           <td>${statusBadge(r.status)}</td>
-          <td class="mono">${r.attempt_count}</td><td class="mono">${r.ttft_ms ?? '—'}</td><td class="mono">${fmtInt((r.tokens_in || 0) + (r.tokens_out || 0))}</td>
-          <td class="mono" style="font-size:11px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.error_message || '')}">${esc(r.error_message || '')}</td></tr>`).join('')}</table></div>${pagerHtml(F.length, lp, 'logs')}`
+          <td class="mono">${r.attempt_count}</td><td class="mono">${fmtInt(r.ttft_ms)}</td><td class="mono">${fmtInt((r.tokens_in || 0) + (r.tokens_out || 0))}</td>
+          <td class="mono" style="font-size:11px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.error_message || '')}">${esc(r.error_message || '')}</td></tr>`).join('')}</table></div>${mobileLogCards(logsView)}${pagerHtml(F.length, lp, 'logs')}`
       : emptyBox('scroll', '当前筛选条件下暂无请求')}
     </section>`;
   } else if (tab === 'sched') {
@@ -1211,7 +1482,7 @@ async function pageLogs(main) {
           const picked = arr.find((x) => x && x.picked);
           return { n: arr.length, label: picked?.label || picked?.account || '' };
         }
-      } catch { /* 非 JSON 按原文显示 */ }
+      } catch { }
       return { n: null, label: String(raw ?? '—') };
     };
     body = `<section class="fade-up" style="animation-delay:100ms">
@@ -1220,7 +1491,7 @@ async function pageLogs(main) {
         ${schedView.map((r) => {
           const c = candInfo(r.candidates);
           return `<tr><td class="mono" style="white-space:nowrap">${fmtTime(r.ts)}</td><td class="mono">${esc(r.request_id)}</td>
-          <td><span class="badge">${esc(r.policy || '—')}</span></td><td>${esc(r.picked || '—')}</td><td>${c.n !== null ? `<span class="badge plain">候选 ${c.n}</span>${c.label ? ` <span class="muted" style="font-size:11px">${esc(c.label)}</span>` : ''}` : esc(c.label)}</td></tr>`;
+          <td><span class="badge">${esc(policyLabel(r.policy))}</span></td><td>${esc(r.picked || '—')}</td><td>${c.n !== null ? `<span class="badge plain">候选 ${c.n}</span>${c.label ? ` <span class="muted" style="font-size:11px">${esc(c.label)}</span>` : ''}` : esc(c.label)}</td></tr>`;
         }).join('')}</table></div>${pagerHtml(sched.length, sp, 'sched')}`
       : emptyBox('timer', '暂无调度记录——首次推理后这里会显示选路时间线')}
     </section>`;
@@ -1239,7 +1510,6 @@ async function pageLogs(main) {
   <div role="tabpanel" id="log-panel" aria-labelledby="log-tab-${tab}">${body}</div>`;
 
   $('#log-refresh', main).addEventListener('click', () => { logCache = null; render({ swap: true }); });
-  // Tab 切换：swap 重渲染（无入场闪动），同 Tab 重复点击忽略
   $$('button[data-ltab]', main).forEach((b) => b.addEventListener('click', () => {
     if (b.dataset.ltab === tab) return;
     window._logTab = b.dataset.ltab;
@@ -1275,19 +1545,19 @@ async function boot() {
   try {
     RUNTIME = await api('/api/runtime-info');
   } catch {
-    // token 失效
     TOKEN = ''; localStorage.removeItem('z2a_token');
     return showLogin();
   }
   $('#login-view').classList.add('hidden');
   $('#app-view').classList.remove('hidden');
+  restoreRoute(UI.readRoute(location.hash));
+  syncRoute();
+  renderNav();
   const ports = `web:${RUNTIME.web_port} · gateway:${RUNTIME.gateway_port}`;
   const pl2 = $('#ports-label2');
   if (pl2) pl2.textContent = ports;
-  renderNav();
   render();
   startOauthWatcher();
-  // 实时刷新：看板 5s（额度/槽位监控），账号页 15s（状态机变化），其余页面不自动刷
   if (window._refreshTimer) clearInterval(window._refreshTimer);
   window._refreshTimer = setInterval(() => {
     if (document.hidden) return;

@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ZCode 多账号额度管理、网关密钥与请求用量控制台。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171717">
 <title>zcode2api 控制台</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/style.css">
 <script>
-  // 首屏无闪烁：主题在渲染前应用（localStorage 记忆，默认跟随系统）
   (function () {
     var t = localStorage.getItem('z2a_theme');
     if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -16,6 +19,7 @@
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">跳转到主要内容</a>
 <div id="login-view" class="login-wrap hidden">
   <form id="login-form" class="login-card">
     <span class="login-logo">
@@ -23,7 +27,12 @@
     </span>
     <h1>zcode2api</h1>
     <p class="sub">ZCode 多账号免费额度管理器与推理网关</p>
-    <input type="password" id="login-password" placeholder="管理员密码" autocomplete="current-password" required>
+    <div class="pw-wrap">
+      <input type="password" id="login-password" placeholder="管理员密码" autocomplete="current-password" required>
+      <button type="button" class="pw-toggle" id="pw-toggle" aria-label="显示密码" aria-pressed="false">
+        <svg class="lucide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
     <button type="submit" class="btn primary">登录</button>
     <p id="login-error" class="error"></p>
   </form>
@@ -31,7 +40,6 @@
 
 <div id="app-view" class="hidden">
   <div class="shell">
-    <!-- 顶部工具药丸行（参考站：右对齐 搜索/语言/版本切换 位置） -->
     <div class="utilrow">
       <span class="pill" id="ports-label2" style="cursor:default"></span>
       <button class="pill" id="theme-btn" aria-label="切换亮/暗主题" title="切换亮/暗主题">
@@ -45,8 +53,9 @@
     </div>
     <main id="main" class="container-7xl"></main>
   </div>
-  <nav id="nav" class="dock-wrap"></nav>
+  <nav id="nav" class="dock-wrap" aria-label="页面导航"></nav>
 </div>
+<script src="/ui-state.js"></script>
 <script src="/claims-view.js"></script>
 <script src="/app.js"></script>
 </body>

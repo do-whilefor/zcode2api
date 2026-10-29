@@ -16,8 +16,6 @@ type schedulingPool struct {
 	accounts []schedulingCandidate
 }
 
-// Read one database snapshot before taking the in-memory reservation lock.
-// LEFT JOIN retains empty groups so default/backup ordering is unchanged.
 func (a *App) schedulingPools(key M) []schedulingPool {
 	query := `SELECT a.*,g.id AS _gid,g.name AS _name,g.role AS _role,g.policy AS _policy,g.family_filter AS _family,g.urgent_window_min AS _urgent FROM groups g LEFT JOIN accounts a ON a.group_id=g.id WHERE g.enabled=1`
 	chain, explicit := parse(key["group_order"], nil).([]any)
@@ -188,8 +186,6 @@ func (a *App) selectAccount(o inferOptions, excluded map[string]bool) (M, bool, 
 	return nil, busy, candidates, ""
 }
 
-// Broadcast changes to every waiter. Capturing the generation before selecting
-// closes the lost-wakeup gap between finding a busy account and going to sleep.
 func (a *App) availability() <-chan struct{} {
 	a.mu.Lock()
 	defer a.mu.Unlock()

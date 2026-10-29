@@ -64,7 +64,7 @@ type App struct {
 	cancel               context.CancelFunc
 	wg                   sync.WaitGroup
 	webPort, gatewayPort int
-	origin               string // Production uses the fixed upstream; tests replace this with an httptest server.
+	origin               string
 }
 
 func New(root, data string, web fs.FS) (*App, error) {
@@ -208,7 +208,7 @@ func readBody(w http.ResponseWriter, r *http.Request) (M, error) {
 	if e != nil {
 		return nil, &Failure{Status: 413, Kind: "invalid", Code: "body_too_large", Message: "请求体超过限制"}
 	}
-	if len(stringsTrim(string(b))) == 0 {
+	if len(strings.TrimSpace(string(b))) == 0 {
 		return M{}, nil
 	}
 	v := parse(string(b), nil)
@@ -225,7 +225,7 @@ func (a *App) ip(r *http.Request) string {
 	}
 	if truth(a.config()["trust_proxy"]) {
 		if f := r.Header.Get("X-Forwarded-For"); f != "" {
-			return stringsTrim(strings.Split(f, ",")[0])
+			return strings.TrimSpace(strings.Split(f, ",")[0])
 		}
 	}
 	return ip

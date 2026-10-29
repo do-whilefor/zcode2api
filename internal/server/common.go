@@ -113,8 +113,6 @@ func parse(s any, d any) any {
 	return v
 }
 
-// Copy JSON-shaped values without a serialization round trip. Scalars keep their
-// original types and precision; mutable maps and slices never share storage.
 func cloneValue(v any) any {
 	switch x := v.(type) {
 	case map[string]any:

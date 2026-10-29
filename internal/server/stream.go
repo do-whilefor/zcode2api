@@ -259,7 +259,6 @@ func (s *protocolStream) complete(r *Result, response M) M {
 	return response
 }
 
-// Slots are reserved at output_item.added, so completion order never changes indices.
 func (s *protocolStream) completedOutput() []any {
 	out := make([]any, 0, len(s.output))
 	for _, item := range s.output {

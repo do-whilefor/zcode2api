@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
 
 func (a *App) AdminHandler() http.Handler {
@@ -290,7 +291,7 @@ func (a *App) adminRoute(r *http.Request, b M) (any, int, error) {
 				}
 				proxyChanged := false
 				if v, exists := fields["proxy_url"]; exists {
-					p := stringsTrim(str(v))
+					p := strings.TrimSpace(str(v))
 					if p != "" && !validProxy(p) {
 						return M{"ok": false, "error": "proxy_url 仅支持 http(s)://host:port"}, 400, nil
 					}
@@ -357,6 +358,9 @@ func (a *App) pendingFlows() []any {
 var versionPattern = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 
 func validateSettings(b M) error {
+	if v, ok := b["app_version"]; ok && !versionPattern.MatchString(str(v)) {
+		return fmt.Errorf("额度与领卡 API 版本须为三段数字，例如 3.16.2")
+	}
 	if v, ok := b["inference_driver"]; ok && str(v) != "http" {
 		return fmt.Errorf("网关仅支持 HTTP 直连")
 	}
@@ -380,7 +384,7 @@ func validateSettings(b M) error {
 			}
 		}
 		if v, ok := h["client_version"]; ok && !versionPattern.MatchString(str(v)) {
-			return fmt.Errorf("HTTP 客户端版本格式无效")
+			return fmt.Errorf("推理 API 版本须为三段数字，例如 0.17.0")
 		}
 	}
 	for _, k := range []string{"poll_interval_sec", "poll_concurrency", "claim_auto_min"} {
@@ -406,7 +410,9 @@ func (a *App) usageStats(r *http.Request) M {
 		hours = 24
 	}
 	hours = min(720, hours)
-	since := nowMS() - int64(hours*3600000)
+	until := nowMS()
+	since := until - int64(hours*3600000)
+	_, offset := time.UnixMilli(until).In(time.Local).Zone()
 	unit, format := "hour", "%Y-%m-%dT%H:00:00"
 	if hours > 24 {
 		unit, format = "day", "%Y-%m-%d"
@@ -421,7 +427,7 @@ func (a *App) usageStats(r *http.Request) M {
 	if len(ttfts) > 0 {
 		ttft = M{"p50": ttfts[len(ttfts)/2], "p95": ttfts[min(len(ttfts)-1, int(float64(len(ttfts))*0.95))]}
 	}
-	return M{"hours": hours, "time_unit": unit, "byHour": byHour, "byModel": a.rows("SELECT model,COUNT(*) reqs,COALESCE(SUM(tokens_in),0) tin,COALESCE(SUM(tokens_out),0) tout,COALESCE(SUM(CASE WHEN status='success' THEN 1 ELSE 0 END),0) ok FROM usage_log WHERE ts>=? GROUP BY model ORDER BY reqs DESC", since), "byKey": a.rows("SELECT k.name,u.key_id,COUNT(*) reqs,COALESCE(SUM(COALESCE(u.tokens_in,0)+COALESCE(u.tokens_out,0)),0) tokens FROM usage_log u LEFT JOIN keys k ON k.id=u.key_id WHERE u.ts>=? GROUP BY u.key_id ORDER BY reqs DESC", since), "byAccount": a.rows("SELECT a.label,u.account_id,COUNT(*) reqs,SUM(CASE WHEN u.status='success' THEN 1 ELSE 0 END) ok,SUM(CASE WHEN u.status='busy' THEN 1 ELSE 0 END) busy,COALESCE(SUM(COALESCE(u.tokens_in,0)+COALESCE(u.tokens_out,0)),0) tokens FROM usage_log u LEFT JOIN accounts a ON a.id=u.account_id WHERE u.ts>=? GROUP BY u.account_id ORDER BY reqs DESC", since), "byStatus": a.rows("SELECT status,COUNT(*) n FROM usage_log WHERE ts>=? GROUP BY status", since), "ttft": ttft}
+	return M{"hours": hours, "time_unit": unit, "range_start": since, "range_end": until, "utc_offset_minutes": offset / 60, "byHour": byHour, "byModel": a.rows("SELECT model,COUNT(*) reqs,COALESCE(SUM(tokens_in),0) tin,COALESCE(SUM(tokens_out),0) tout,COALESCE(SUM(CASE WHEN status='success' THEN 1 ELSE 0 END),0) ok FROM usage_log WHERE ts>=? GROUP BY model ORDER BY reqs DESC", since), "byKey": a.rows("SELECT k.name,u.key_id,COUNT(*) reqs,COALESCE(SUM(COALESCE(u.tokens_in,0)+COALESCE(u.tokens_out,0)),0) tokens FROM usage_log u LEFT JOIN keys k ON k.id=u.key_id WHERE u.ts>=? GROUP BY u.key_id ORDER BY reqs DESC", since), "byAccount": a.rows("SELECT a.label,u.account_id,COUNT(*) reqs,SUM(CASE WHEN u.status='success' THEN 1 ELSE 0 END) ok,SUM(CASE WHEN u.status='busy' THEN 1 ELSE 0 END) busy,COALESCE(SUM(COALESCE(u.tokens_in,0)+COALESCE(u.tokens_out,0)),0) tokens FROM usage_log u LEFT JOIN accounts a ON a.id=u.account_id WHERE u.ts>=? GROUP BY u.account_id ORDER BY reqs DESC", since), "byStatus": a.rows("SELECT status,COUNT(*) n FROM usage_log WHERE ts>=? GROUP BY status", since), "ttft": ttft}
 }
 func (a *App) performance(limit int) M {
 	rows := a.rows("SELECT timings FROM usage_log WHERE timings IS NOT NULL ORDER BY id DESC LIMIT ?", limit)

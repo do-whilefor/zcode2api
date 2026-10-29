@@ -29,7 +29,7 @@ func readSSE(body io.Reader, consume func(Frame) error) error {
 		data := []string{}
 		for _, line := range lines {
 			if strings.HasPrefix(line, "event:") {
-				f.Event = stringsTrim(line[6:])
+				f.Event = strings.TrimSpace(line[6:])
 			}
 			if strings.HasPrefix(line, "data:") {
 				data = append(data, strings.TrimPrefix(line[5:], " "))
@@ -94,17 +94,14 @@ func (t *requestTiming) observe(e Event) {
 	}
 	v := time.Since(t.start).Milliseconds()
 	if t.first == nil {
-		x := v
-		t.first = &x
+		t.first = &v
 	}
 	t.last = &v
 	if e.Type == "reasoning_delta" && t.reason == nil {
-		x := v
-		t.reason = &x
+		t.reason = &v
 	}
 	if e.Type == "text_delta" && t.text == nil {
-		x := v
-		t.text = &x
+		t.text = &v
 	}
 }
 func (t *requestTiming) snapshot() M {
@@ -166,8 +163,7 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 		timers = append(timers, t)
 		return t
 	}
-	total := timer("HTTP 整轮推理超时", ms(params["total_timeout_ms"]))
-	_ = total
+	timer("HTTP 整轮推理超时", ms(params["total_timeout_ms"]))
 	firstTimer := timer("HTTP 首字超时", ms(params["first_token_timeout_ms"]))
 	idle := timer("HTTP 上游流空闲超时", ms(params["idle_timeout_ms"]))
 	var admission *time.Timer
