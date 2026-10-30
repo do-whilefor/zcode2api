@@ -1,7 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$binaryPath = Join-Path $projectRoot 'bin/zcode2api.exe'
-$dataPath = if ($env:ZCODE2API_DATA_DIR) { [IO.Path]::GetFullPath($env:ZCODE2API_DATA_DIR) } else { Join-Path $projectRoot 'data' }
+$sourceCheckout = Test-Path -LiteralPath (Join-Path $projectRoot 'go.mod') -PathType Leaf
+$binaryPath = if ($sourceCheckout) { Join-Path $projectRoot 'bin/zcode2api.exe' } else { Join-Path $projectRoot 'zcode2api.exe' }
+$dataPath = if ($env:ZCODE2API_DATA_DIR) {
+    $configuredDataPath = $env:ZCODE2API_DATA_DIR
+    if (![IO.Path]::IsPathRooted($configuredDataPath)) { $configuredDataPath = Join-Path $projectRoot $configuredDataPath }
+    [IO.Path]::GetFullPath($configuredDataPath)
+} else { Join-Path $projectRoot 'data' }
 $portsFile = Join-Path $dataPath 'ports.json'
 if (!(Test-Path -LiteralPath $portsFile)) { Write-Output 'No ports.json; nothing to stop.'; exit 0 }
 $info = Get-Content -LiteralPath $portsFile -Raw | ConvertFrom-Json

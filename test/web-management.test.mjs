@@ -49,3 +49,20 @@ test('账号与领卡视图转义上游名称、ID、错误及任务内容', () 
   assert.match(markup, /&lt;img/);
   assert.doesNotMatch(context.accountQuotaMarkup({ quota_buckets: [{ name: unsafe, remaining: 1, total: 2 }] }), /<img/);
 });
+
+test('部分来源失败仍显示活动卡，查询失败不显示暂无可领', () => {
+  const preview = { account_id: 'a', warning: '<缺少 data>', plans: [{ plan_id: 'weekend-card', name: 'Weekend Build', entitlements: [{ show_name: 'GLM-5.3-Flash', grant_units: 300000000, unit_type: 'token' }] }] };
+  const markup = context.claimAccountMarkup(preview);
+  assert.match(markup, /1 项可领取/);
+  assert.match(markup, /3亿/);
+  assert.match(markup, /data-plan="weekend-card"/);
+  assert.match(markup, /部分领取来源暂不可用/);
+  assert.match(markup, /&lt;缺少 data&gt;/);
+  assert.doesNotMatch(markup, /暂无可领/);
+  const unavailable = context.claimAccountMarkup({ account_id: 'a', error: '所有来源不可用' });
+  assert.match(unavailable, /查询失败/);
+  assert.doesNotMatch(unavailable, /暂无可领|data-claim=/);
+  const partial = context.claimAccountMarkup({ account_id: 'a', warning: '一个来源不可用' });
+  assert.match(partial, /清单不完整/);
+  assert.doesNotMatch(partial, /暂无可领|data-claim=/);
+});

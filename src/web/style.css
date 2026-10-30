@@ -719,11 +719,11 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
 .claim-account > .inline-notice { margin-block: 6px; }
 .claim-account > .claim-plan:first-of-type, .claim-account > .claim-pending { margin-top: 8px; }
 .section-kicker { display: block; margin-bottom: 6px; color: var(--ok); font-size: 11px; font-weight: 600; }
-.claim-plan { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-block: 8px; }
+.claim-plan { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid var(--border); padding-block: 2px; }
 .claim-plan > div { min-width: 0; flex: 1; }
 .claim-plan > .btn { flex: none; }
 .claim-plan h3, .section-heading h3 { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; }
-.claim-grants { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 5px; }
+.claim-grants { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 .claim-grants > div { min-width: 130px; }
 .claim-grants span { display: block; color: var(--muted-fg); font-size: 12px; }
 .claim-grants strong { display: block; margin-top: 2px; font-size: 17px; font-weight: 600; }
@@ -738,14 +738,14 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
 .claim-pending-row > div > span { display: block; margin-top: 4px; font-size: 11px; color: var(--muted-fg); }
 .claim-pending-row > strong { font-size: 18px; font-weight: 500; white-space: nowrap; }
 .claim-pending-row time { color: var(--muted-fg); font-size: 11px; text-align: right; }
-.claim-tasks { margin-top: 12px; border-top: 1px solid var(--border); }
-.claim-tasks summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; padding-top: 10px; font-size: 12px; list-style: none; }
+.claim-tasks { margin-top: 2px; border-top: 1px solid var(--border); }
+.claim-tasks summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; padding-top: 6px; font-size: 12px; list-style: none; }
 .claim-tasks summary::before { content: '›'; display: inline-block; font-size: 18px; line-height: 1; transition: transform 160ms var(--ease-out); }
 .claim-tasks[open] summary::before { transform: rotate(90deg); }
 .claim-tasks summary::-webkit-details-marker { display: none; }
 .claim-tasks summary > .muted { margin-left: auto; font-size: 11px; }
 .claim-task-list { display: grid; gap: 12px; padding-top: 12px; }
-.claim-task { max-width: 680px; }
+.claim-task { min-width: 0; width: 100%; }
 .claim-task p { color: var(--muted-fg); font-size: 12px; line-height: 1.7; margin: 6px 0; }
 .task-track { height: 5px; margin-block: 10px; border-radius: 8px; overflow: hidden; background: var(--border); }
 .task-track i { display: block; width: 100%; height: 100%; background: var(--info); transform-origin: left; }
@@ -991,6 +991,7 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
   .claim-account-header { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
   .claim-account-heading-actions { justify-content: flex-start; }
   .claim-plan { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .claim-plan > div { width: 100%; flex: none; }
   .claim-plan > .btn { width: 100%; }
   .claim-pending { padding: 10px; }
   .claim-pending-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }

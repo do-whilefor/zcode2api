@@ -47,13 +47,32 @@ zcode2api 是一个使用 Go 编写的 ZCode 多账号额度管理与 HTTP 推�
 | --- | --- |
 | 操作系统 | Windows、Linux 或 macOS |
 | 源码构建 | Go **1.26 或更高版本** |
-| Windows 启停脚本 | PowerShell，且 `go` 命令可用 |
+| Windows 启停脚本 | PowerShell；源码启动还需 `go` 命令，Release 压缩包无需 Go |
 | Docker 部署 | Docker Engine / Docker Desktop 与 Docker Compose |
 | 账号 | 本人拥有或获得明确授权，且具备相应 ZCode 权益的账号 |
 
 ### 安装与启动
 
-下载源码后，进入项目根目录，选择一种方式启动。
+可使用预编译 Release 压缩包、源码或 Docker 启动。程序版本可通过 `zcode2api --version` 查看；设置里的 `app_version` 是上游 API 版本，二者独立。
+
+**预编译 Release 压缩包（无需 Go）：**
+
+从 [Releases](https://github.com/do-whilefor/zcode2api/releases) 下载对应操作系统和架构的压缩包，完整解压后进入该目录。
+
+Windows 在 PowerShell 中运行 `./scripts/start.ps1`，会直接使用压缩包内的 `zcode2api.exe` 在后台启动；停止时运行 `./scripts/stop.ps1`。也可以运行 `./zcode2api.exe --root .` 在当前终端启动。
+
+Linux / macOS 运行：
+
+```bash
+chmod +x ./zcode2api
+./zcode2api --root .
+```
+
+首次管理密码保存在 `data/admin-password.txt`。Windows 启停脚本中的相对 `ZCODE2API_DATA_DIR` 以项目或解压目录为基准。
+
+**从源码启动：**
+
+下载源码后，进入项目根目录，选择下列方式。
 
 **Windows PowerShell：**
 
@@ -102,7 +121,7 @@ docker compose up -d --build
 4. 进入「领卡」查看可领取卡、待生效额度与领取记录，可手动领取单张卡或全部可领卡。
 5. 在「设置 → 自动领卡」中确认开关和检查周期。默认启用，检查周期为 **240 分钟**，服务需保持运行。
 
-自动领卡只领取上游实际提供、账号符合条件的额度卡。需要先完成的奖励任务仍需用户在 ZCode 中完成；领取成功也可能有生效时间，待生效额度不会计入当前可用余额。
+自动领卡合并查询活动投放接口和旧版额度卡接口，只领取上游明确提供领取动作或列入可领清单的卡片。同一卡片按 `plan_id` 去重；部分来源异常时保留已查询到的卡片并提示“部分同步”，全部失败时提示查询失败。需要先完成的奖励任务仍需用户在 ZCode 中完成；领取成功也可能有生效时间，待生效额度不会计入当前可用余额。
 
 网页 Cookie 导入仅用于受支持的平台资料等接口，**不能用于推理或余额查询**。推理和领卡需要账号具备有效的 ZCode 凭据。
 
@@ -127,6 +146,8 @@ Windows 停止服务：
 ```
 
 更新源码后，先停止服务，再运行 `start.ps1` 重新构建并启动。Linux / macOS 前台运行时按 `Ctrl+C` 停止，更新源码后重新构建。
+
+使用 Release 压缩包时，先停止旧程序，再用新版本替换程序、启停脚本等发行文件，保留原来的 `data` 目录和自定义 `config.json`，然后重新启动。
 
 Docker 更新源码后，重新构建并启动：
 

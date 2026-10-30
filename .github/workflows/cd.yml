@@ -47,9 +47,11 @@ jobs:
             binary=zcode2api.exe
           fi
           mkdir -p "dist/$package"
-          go build -trimpath -ldflags="-s -w" -o "dist/$package/$binary" .
-          cp LICENSE README.md SECURITY.md config.example.json "dist/$package/"
+          go build -trimpath -ldflags="-s -w -X main.version=${GITHUB_REF_NAME}" -o "dist/$package/$binary" .
+          cp LICENSE README.md SECURITY.md CHANGELOG.md config.example.json "dist/$package/"
           if [ "$GOOS" = windows ]; then
+            mkdir -p "dist/$package/scripts"
+            cp scripts/start.ps1 scripts/stop.ps1 "dist/$package/scripts/"
             (cd dist && zip -r "$package.zip" "$package")
           else
             tar -czf "dist/$package.tar.gz" -C dist "$package"
@@ -102,6 +104,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ github.ref_name }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -137,4 +140,4 @@ jobs:
           if [[ "$TAG" == *-* ]]; then
             flags+=(--prerelease)
           fi
-          gh release create "$TAG" dist/* --verify-tag --title "$TAG" --generate-notes "${flags[@]}"
+          gh release create "$TAG" dist/* --verify-tag --title "zcode2api $TAG" --generate-notes "${flags[@]}"

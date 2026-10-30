@@ -4,9 +4,45 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 func (a *App) preview(ctx context.Context, r M) (M, error) {
+	// New campaigns are delivered through marketing/touch; billing/preview
+	// remains a separate source for older manually claimable plans.
+	plans, warnings := []any{}, []string{}
+	seen := map[string]bool{}
+	for _, source := range []struct {
+		name string
+		load func(context.Context, M) (M, error)
+	}{{"活动卡", a.marketingPreview}, {"额度卡", a.billingPreview}} {
+		p, e := source.load(ctx, r)
+		if e != nil {
+			warnings = append(warnings, source.name+": "+e.Error())
+			continue
+		}
+		for _, v := range arr(p["plans"]) {
+			plan := obj(v)
+			id := strings.TrimSpace(str(plan["plan_id"]))
+			if id == "" || seen[id] {
+				continue
+			}
+			seen[id] = true
+			plan["plan_id"] = id
+			plans = append(plans, plan)
+		}
+	}
+	out := M{"plans": plans}
+	if len(warnings) == 2 {
+		return out, fmt.Errorf("%s", strings.Join(warnings, "；"))
+	}
+	if len(warnings) > 0 {
+		out["warning"] = strings.Join(warnings, "；")
+	}
+	return out, nil
+}
+
+func (a *App) billingPreview(ctx context.Context, r M) (M, error) {
 	res, e := a.api(ctx, r, "GET", "/api/v1/zcode-plan/billing/preview?app_version="+url.QueryEscape(str(a.config()["app_version"]))+"&platform="+url.QueryEscape(platform()), str(a.tokens(str(r["id"]))["zcode_jwt"]), nil, M{"X-Device-Mid": r["device_mid"]}, a.jar(str(r["id"])))
 	if e != nil {
 		return nil, e
@@ -14,7 +50,58 @@ func (a *App) preview(ctx context.Context, r M) (M, error) {
 	if !res.OK || !codeIs(res.JSON["code"], 0) {
 		return nil, apiFailure(res, "preview 失败")
 	}
-	return obj(res.JSON["data"]), nil
+	d, ok := res.JSON["data"].(map[string]any)
+	if !ok || d == nil {
+		return nil, fmt.Errorf("preview 响应缺少 data，无法确认可领取清单")
+	}
+	if d["plans"] != nil {
+		if _, ok := d["plans"].([]any); !ok {
+			return nil, fmt.Errorf("preview 响应的 plans 格式无效")
+		}
+	}
+	return d, nil
+}
+
+func (a *App) marketingPreview(ctx context.Context, r M) (M, error) {
+	res, e := a.api(ctx, r, "GET", "/api/v1/marketing/touch", str(a.tokens(str(r["id"]))["zcode_jwt"]), nil, M{"X-Device-Mid": r["device_mid"]}, a.jar(str(r["id"])))
+	if e != nil {
+		return nil, e
+	}
+	if !res.OK || !codeIs(res.JSON["code"], 0) {
+		return nil, apiFailure(res, "活动卡查询失败")
+	}
+	deliveries, ok := obj(res.JSON["data"])["deliveries"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("活动卡响应缺少 deliveries 清单或格式无效")
+	}
+	plans := []any{}
+	for _, v := range deliveries {
+		delivery := obj(v)
+		position := str(delivery["resource_position"])
+		if position != "banner" && position != "popup" {
+			continue
+		}
+		content := obj(delivery[position])
+		for _, v := range arr(content["buttons"]) {
+			action := obj(obj(v)["action"])
+			id := strings.TrimSpace(str(obj(action["args"])["plan_id"]))
+			if str(action["type"]) != "claim_zcode_plan" || id == "" {
+				continue
+			}
+			// Only explicit claim actions establish availability. Metadata in
+			// success popups or referral rewards does not make a plan claimable.
+			plan := M{"plan_id": id, "name": id, "entitlements": []any{}}
+			for _, key := range []string{"background", "hero"} {
+				details := obj(obj(obj(content[key])["args"])["zcode_plan"])
+				if strings.TrimSpace(str(details["plan_id"])) == id {
+					plan = merge(details, M{"plan_id": id, "name": fallback(details["name"], id), "entitlements": arr(details["entitlements"])})
+					break
+				}
+			}
+			plans = append(plans, plan)
+		}
+	}
+	return M{"plans": plans}, nil
 }
 func (a *App) incentives(ctx context.Context, r M) (M, error) {
 	res, e := a.api(ctx, r, "GET", "/api/v1/incentive/referral/summary", str(a.tokens(str(r["id"]))["zcode_jwt"]), nil, nil, nil)
@@ -65,6 +152,9 @@ func (a *App) discover(ctx context.Context, id string) M {
 		m := M{"account_id": r["id"], "label": r["label"], "plans": []any{}}
 		if p, e := a.preview(ctx, r); e == nil {
 			m["plans"] = arr(p["plans"])
+			if p["warning"] != nil {
+				m["warning"] = p["warning"]
+			}
 		} else {
 			m["error"] = e.Error()
 		}
@@ -147,6 +237,9 @@ func (a *App) autoClaim(ctx context.Context, dry bool) (M, error) {
 		if e != nil {
 			results = append(results, M{"account": id, "error": e.Error()})
 			continue
+		}
+		if p["warning"] != nil {
+			results = append(results, M{"account": id, "warning": p["warning"]})
 		}
 		seen := map[string]bool{}
 		for _, v := range arr(p["plans"]) {

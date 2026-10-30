@@ -19,10 +19,18 @@ import (
 //go:embed src/web/*
 var assets embed.FS
 
+// version is set by release builds; app_version configures the upstream API.
+var version = "dev"
+
 func main() {
 	root := flag.String("root", ".", "配置文件所在目录")
 	health := flag.String("healthcheck", "", "检查指定健康地址后退出")
+	showVersion := flag.Bool("version", false, "显示程序版本后退出")
 	flag.Parse()
+	if *showVersion {
+		fmt.Println("zcode2api " + version)
+		return
+	}
 	if *health != "" {
 		if *health == "auto" {
 			data := os.Getenv("ZCODE2API_DATA_DIR")

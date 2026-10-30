@@ -59,5 +59,13 @@ jobs:
       - name: Test frontend
         run: node --test test/*.test.mjs
 
+      - name: Test Windows startup scripts
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          go build -trimpath -o bin/zcode2api-smoke.exe .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./test/startup.test.ps1 -BinaryPath ./bin/zcode2api-smoke.exe
+
       - name: Build
         run: go build -trimpath ./...

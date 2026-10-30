@@ -1,7 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$binaryPath = Join-Path $projectRoot 'bin/zcode2api.exe'
-$dataPath = if ($env:ZCODE2API_DATA_DIR) { [IO.Path]::GetFullPath($env:ZCODE2API_DATA_DIR) } else { Join-Path $projectRoot 'data' }
+$sourceCheckout = Test-Path -LiteralPath (Join-Path $projectRoot 'go.mod') -PathType Leaf
+$binaryPath = if ($sourceCheckout) { Join-Path $projectRoot 'bin/zcode2api.exe' } else { Join-Path $projectRoot 'zcode2api.exe' }
+$dataPath = if ($env:ZCODE2API_DATA_DIR) {
+    $configuredDataPath = $env:ZCODE2API_DATA_DIR
+    if (![IO.Path]::IsPathRooted($configuredDataPath)) { $configuredDataPath = Join-Path $projectRoot $configuredDataPath }
+    [IO.Path]::GetFullPath($configuredDataPath)
+} else { Join-Path $projectRoot 'data' }
 $portsFile = Join-Path $dataPath 'ports.json'
 if (Test-Path -LiteralPath $portsFile) {
     $info = Get-Content -LiteralPath $portsFile -Raw | ConvertFrom-Json
@@ -12,13 +17,17 @@ if (Test-Path -LiteralPath $portsFile) {
     }
 }
 New-Item -ItemType Directory -Path $dataPath -Force | Out-Null
-New-Item -ItemType Directory -Path (Split-Path -Parent $binaryPath) -Force | Out-Null
-$goPath = (Get-Command go -ErrorAction Stop).Source
-Push-Location -LiteralPath $projectRoot
-try {
-    & $goPath build -trimpath -o $binaryPath .
-    if ($LASTEXITCODE -ne 0) { throw 'Go build failed.' }
-} finally { Pop-Location }
+if ($sourceCheckout) {
+    New-Item -ItemType Directory -Path (Split-Path -Parent $binaryPath) -Force | Out-Null
+    $goPath = (Get-Command go -ErrorAction Stop).Source
+    Push-Location -LiteralPath $projectRoot
+    try {
+        & $goPath build -trimpath -o $binaryPath .
+        if ($LASTEXITCODE -ne 0) { throw 'Go build failed.' }
+    } finally { Pop-Location }
+} elseif (!(Test-Path -LiteralPath $binaryPath -PathType Leaf)) {
+    throw 'zcode2api.exe is missing. Extract the complete Windows release archive before starting.'
+}
 $serviceProcess = Start-Process -FilePath $binaryPath -ArgumentList ('--root "' + $projectRoot + '"') -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $dataPath 'service.stdout.log') -RedirectStandardError (Join-Path $dataPath 'service.stderr.log')
 for ($attempt = 0; $attempt -lt 75; $attempt++) {
     Start-Sleep -Milliseconds 200

@@ -1,11 +1,12 @@
 FROM golang:1.26-bookworm AS build
+ARG VERSION=dev
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY main.go ./
 COPY internal ./internal
 COPY src/web ./src/web
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/zcode2api .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/zcode2api .
 
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
