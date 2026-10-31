@@ -147,7 +147,7 @@ func TestGatewayCancellationReleasesSlot(t *testing.T) {
 		a.mu.Lock()
 		inflight := a.state(str(accounts[0]["id"])).Inflight
 		a.mu.Unlock()
-		if !inflight {
+		if inflight == 0 {
 			break
 		}
 		if time.Now().After(deadline) {

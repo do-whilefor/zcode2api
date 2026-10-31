@@ -116,7 +116,6 @@ section > h2 .lucide { color: var(--muted-fg); }
 html.dark .pill { border-color: oklch(1 0 0 / 10%); background: oklch(1 0 0 / 4%); }
 .pill:hover { background: var(--muted); color: var(--foreground); }
 .pill .lucide { opacity: .7; }
-kbd.pill-kbd { font: 500 10px/1 inherit; opacity: .7; border: 1px solid var(--border); border-radius: 4px; padding: 1px 4px; }
 
 .dock-wrap {
   position: fixed; z-index: 40;
@@ -343,12 +342,8 @@ html.dark .statcard .ico { background: oklch(1 0 0 / 8%); box-shadow: none; }
 .tone-success { color: var(--ok); }
 .tone-warning { color: var(--warn); }
 .tone-danger { color: var(--destructive); }
-.tone-info { color: var(--info); }
-.tone-accent { color: var(--foreground); }
 html.dark .ico.tone-success { background: oklch(0.596 0.145 163 / 18%); }
 html.dark .ico.tone-warning { background: oklch(0.666 0.179 58 / 18%); }
-html.dark .ico.tone-danger { background: oklch(0.577 0.245 27 / 20%); }
-html.dark .ico.tone-info { background: oklch(0.623 0.214 259 / 20%); }
 
 .tablecard {
   border: 1px solid var(--border);
@@ -431,7 +426,6 @@ html.dark .badge.plain { background: oklch(1 0 0 / 6%); }
 }
 label.f { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 500; color: var(--muted-fg); }
 label.f input, label.f select { height: 32px; }
-label.f.wide { grid-column: 1 / -1; }
 label.f.check { flex-direction: row; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--foreground); }
 label.f.check input { flex: none; }
 .kv { display: grid; grid-template-columns: 88px 1fr; align-items: center; gap: 8px; }

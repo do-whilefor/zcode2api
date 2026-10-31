@@ -281,11 +281,10 @@ async function renderPage(opts = {}) {
   if (!previous.length) main.innerHTML = `${pagehead(PAGES.find(p => p[0] === page)?.[1] || '控制台', '正在加载…')}<div class="page-skeleton" aria-hidden="true"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>`;
   main.dataset.loading = '1';
   main.setAttribute('aria-busy', 'true');
-  // 自动刷新不播放入场动画。
   main.classList.toggle('no-anim', !!opts.swap);
   try {
     if (currentPage === 'dashboard') await pageDashboard(main);
-    else if (currentPage === 'accounts') await pageAccounts(main);
+    else if (currentPage === 'accounts') await pageAccounts();
     else if (currentPage === 'claims') await pageClaims(main);
     else if (currentPage === 'usage') await pageUsage(main);
     else if (currentPage === 'keys') await pageKeys(main);
@@ -651,7 +650,7 @@ function accountQuotaMarkup(account) {
     ${live || pending ? `<details class="quota-details"><summary>查看 ${buckets.length + pendingBuckets.length} 项额度</summary><div class="quota-ledger">${live}${pending}</div></details>` : `<p class="quiet-message">${account.has_zcode_jwt ? account.last_balance ? '暂无生效额度' : '等待余额查询' : '网页账号不参与推理'}</p>`}`;
 }
 
-async function pageAccounts(main) {
+async function pageAccounts() {
   const [accounts, groups] = await Promise.all([api('/api/accounts'), api('/api/groups')]);
   window._accCache = accounts;
   renderAccPage(accounts, groups);

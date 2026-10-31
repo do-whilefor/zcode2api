@@ -16,7 +16,7 @@ import (
 )
 
 type accountState struct {
-	Inflight bool
+	Inflight int
 	LastUsed int64
 	Cooldown int64
 }
@@ -132,7 +132,7 @@ func (a *App) Close() {
 		a.logfile.Close()
 	}
 }
-func (a *App) background(f func()) { a.wg.Add(1); go func() { defer a.wg.Done(); f() }() }
+func (a *App) background(f func()) { a.wg.Go(f) }
 func (a *App) ensureGroups() {
 	if a.row("SELECT id FROM groups WHERE id='g_main'") == nil {
 		legacy := a.rows("SELECT id FROM groups WHERE id IN ('g_domestic','g_intl','g_backup')")

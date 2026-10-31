@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"runtime"
@@ -14,7 +15,7 @@ import (
 	"time"
 )
 
-type Frame struct{ Event, Data, Raw string }
+type Frame struct{ Data, Raw string }
 
 func readSSE(body io.Reader, consume func(Frame) error) error {
 	scanner := bufio.NewScanner(body)
@@ -28,9 +29,6 @@ func readSSE(body io.Reader, consume func(Frame) error) error {
 		f := Frame{Raw: strings.Join(lines, "\n") + "\n\n"}
 		data := []string{}
 		for _, line := range lines {
-			if strings.HasPrefix(line, "event:") {
-				f.Event = strings.TrimSpace(line[6:])
-			}
 			if strings.HasPrefix(line, "data:") {
 				data = append(data, strings.TrimPrefix(line[5:], " "))
 			}
@@ -145,7 +143,7 @@ func providerFailure(v M, status int, retry string) *Failure {
 	return &Failure{Status: status, Code: str(first(e["code"], v["code"], e["type"], "upstream_http_error")), Message: str(first(e["message"], v["msg"], v["message"], fmt.Sprintf("上游 HTTP %d", status))), RetryAfter: retryAfter(retry, time.Now())}
 }
 
-var stopSSE = errors.New("message_stop")
+var errStopSSE = errors.New("message_stop")
 
 func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (result *Result, failure *Failure) {
 	if o.Timing == nil {
@@ -371,12 +369,8 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 			if r.Native == nil {
 				return providerFailure(M{"message": "上游缺少 message_start"}, 502, "")
 			}
-			for k, v := range obj(event["delta"]) {
-				r.Native[k] = v
-			}
-			for k, v := range obj(event["usage"]) {
-				usage[k] = v
-			}
+			maps.Copy(r.Native, obj(event["delta"]))
+			maps.Copy(usage, obj(event["usage"]))
 		}
 		if typ == "message_stop" {
 			if len(open) > 0 {
@@ -405,11 +399,11 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 			}
 		}
 		if stopped {
-			return stopSSE
+			return errStopSSE
 		}
 		return nil
 	})
-	if e != nil && e != stopSSE {
+	if e != nil && e != errStopSSE {
 		if f, ok := e.(*Failure); ok {
 			return nil, f
 		}

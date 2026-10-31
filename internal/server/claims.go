@@ -8,8 +8,6 @@ import (
 )
 
 func (a *App) preview(ctx context.Context, r M) (M, error) {
-	// New campaigns are delivered through marketing/touch; billing/preview
-	// remains a separate source for older manually claimable plans.
 	plans, warnings := []any{}, []string{}
 	seen := map[string]bool{}
 	for _, source := range []struct {

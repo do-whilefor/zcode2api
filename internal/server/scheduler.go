@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const accountConcurrencyLimit = 3
+
 type schedulingCandidate struct {
 	row       M
 	remaining float64
@@ -137,7 +139,7 @@ func (a *App) selectAccount(o inferOptions, excluded map[string]bool) (M, bool, 
 		preferred := func(x, y schedulingCandidate) bool {
 			xs, ys := a.state(str(x.row["id"])), a.state(str(y.row["id"]))
 			if stickyValid {
-				xp, yp := str(x.row["id"]) == sticky.Account && !xs.Inflight, str(y.row["id"]) == sticky.Account && !ys.Inflight
+				xp, yp := str(x.row["id"]) == sticky.Account, str(y.row["id"]) == sticky.Account
 				if xp != yp {
 					return xp
 				}
@@ -164,7 +166,7 @@ func (a *App) selectAccount(o inferOptions, excluded map[string]bool) (M, bool, 
 			c := &usable[i]
 			id := str(c.row["id"])
 			s := a.state(id)
-			if s.Inflight {
+			if s.Inflight >= accountConcurrencyLimit {
 				busy = true
 				continue
 			}
@@ -174,7 +176,7 @@ func (a *App) selectAccount(o inferOptions, excluded map[string]bool) (M, bool, 
 		}
 		if picked != nil {
 			id := str(picked.row["id"])
-			a.state(id).Inflight = true
+			a.state(id).Inflight++
 			for _, v := range candidates {
 				if m := obj(v); str(m["account"]) == id {
 					m["picked"] = true
@@ -204,7 +206,7 @@ func (a *App) notifyAvailable() { a.mu.Lock(); a.notifyAvailableLocked(); a.mu.U
 func (a *App) release(id string) {
 	a.mu.Lock()
 	s := a.state(id)
-	s.Inflight = false
+	s.Inflight = max(0, s.Inflight-1)
 	s.LastUsed = nowMS()
 	a.notifyAvailableLocked()
 	a.mu.Unlock()

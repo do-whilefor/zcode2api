@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"strconv"
 	"strings"
 	"time"
@@ -139,12 +140,8 @@ func clone(m M) M {
 }
 func merge(a, b M) M {
 	c := M{}
-	for k, v := range a {
-		c[k] = v
-	}
-	for k, v := range b {
-		c[k] = v
-	}
+	maps.Copy(c, a)
+	maps.Copy(c, b)
 	return c
 }
 func nowMS() int64         { return time.Now().UnixMilli() }

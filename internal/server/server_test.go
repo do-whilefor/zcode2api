@@ -392,7 +392,7 @@ func TestImmediateRotationAndNoReplay(t *testing.T) {
 				a.mu.Lock()
 				inflight := a.state(str(r["id"])).Inflight
 				a.mu.Unlock()
-				if inflight {
+				if inflight != 0 {
 					t.Fatal("slot leaked")
 				}
 			}
@@ -585,17 +585,25 @@ func TestSchedulerConcurrentQueueAndBackup(t *testing.T) {
 		t.Fatal("cancel ignored")
 	}
 	a.mu.Lock()
-	if !a.state(str(r["id"])).Inflight {
+	if a.state(str(r["id"])).Inflight != 1 {
 		t.Fatal("cancel released another request")
 	}
 	a.mu.Unlock()
+	for range 2 {
+		selected, _, _, _ := a.selectAccount(o, nil)
+		if selected == nil || selected["id"] != accounts[0]["id"] {
+			t.Fatal("primary account did not accept three requests")
+		}
+	}
 	must(t, a.exec("INSERT INTO groups(id,name,role,created_at) VALUES('backup','backup','backup',?)", nowMS()))
 	backup, e := a.insertAccount(M{"family": "zai", "status": "active", "group_id": "backup"}, M{})
 	must(t, e)
 	r2, _, _, _ := a.selectAccount(o, map[string]bool{})
 	equal(t, r2["id"], backup["id"])
 	a.release(str(r2["id"]))
-	a.release(str(r["id"]))
+	for range 3 {
+		a.release(str(r["id"]))
+	}
 	var wg sync.WaitGroup
 	inflight := map[string]int{}
 	var mu sync.Mutex
@@ -611,8 +619,8 @@ func TestSchedulerConcurrentQueueAndBackup(t *testing.T) {
 			id := str(r["id"])
 			mu.Lock()
 			inflight[id]++
-			if inflight[id] > 1 {
-				t.Error("concurrent request on same account")
+			if inflight[id] > 3 {
+				t.Error("more than three concurrent requests on same account")
 			}
 			mu.Unlock()
 			time.Sleep(time.Millisecond)

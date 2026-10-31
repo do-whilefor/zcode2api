@@ -20,8 +20,16 @@ func lengthFinish(s string) bool {
 	s = strings.ToLower(s)
 	return strings.Contains(s, "length") || strings.Contains(s, "max_tokens") || strings.Contains(s, "max_output_tokens")
 }
+func chatFinishReason(r *Result) string {
+	if len(r.Calls) > 0 {
+		return "tool_calls"
+	}
+	if lengthFinish(r.FinishReason) {
+		return "length"
+	}
+	return "stop"
+}
 func buildResponse(protocol string, r *Result, model, id string) M {
-	length := lengthFinish(r.FinishReason)
 	if protocol == "anthropic" {
 		return r.Native
 	}
@@ -30,12 +38,7 @@ func buildResponse(protocol string, r *Result, model, id string) M {
 		if r.Reasoning != "" {
 			m["reasoning_content"] = r.Reasoning
 		}
-		finish := "stop"
-		if length {
-			finish = "length"
-		}
 		if len(r.Calls) > 0 {
-			finish = "tool_calls"
 			calls := []any{}
 			for _, v := range r.Calls {
 				c := obj(v)
@@ -43,7 +46,7 @@ func buildResponse(protocol string, r *Result, model, id string) M {
 			}
 			m["tool_calls"] = calls
 		}
-		return M{"id": id, "object": "chat.completion", "created": time.Now().Unix(), "model": model, "choices": []any{M{"index": 0, "message": m, "finish_reason": finish}}, "usage": chatUsage(r.Usage)}
+		return M{"id": id, "object": "chat.completion", "created": time.Now().Unix(), "model": model, "choices": []any{M{"index": 0, "message": m, "finish_reason": chatFinishReason(r)}}, "usage": chatUsage(r.Usage)}
 	}
 	output := []any{}
 	if r.Reasoning != "" {
@@ -58,7 +61,7 @@ func buildResponse(protocol string, r *Result, model, id string) M {
 	}
 	status := "completed"
 	var incomplete any
-	if length {
+	if lengthFinish(r.FinishReason) {
 		status = "incomplete"
 		incomplete = M{"reason": "max_output_tokens"}
 	}

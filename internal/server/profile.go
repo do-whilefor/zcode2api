@@ -59,9 +59,7 @@ func (a *App) addPlatformNames(ctx context.Context, accounts []any) {
 	sem := make(chan struct{}, 4)
 	for _, v := range accounts {
 		r := obj(v)
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			select {
 			case sem <- struct{}{}:
 			case <-ctx.Done():
@@ -69,7 +67,7 @@ func (a *App) addPlatformNames(ctx context.Context, accounts []any) {
 			}
 			defer func() { <-sem }()
 			r["platform_name"] = a.platformName(ctx, r)
-		}()
+		})
 	}
 	wg.Wait()
 }

@@ -56,9 +56,7 @@ func newStream(w http.ResponseWriter, r *http.Request, protocol, id, model strin
 		s.event("response.created", M{"response": response})
 		s.event("response.in_progress", M{"response": response})
 	}
-	s.worker.Add(1)
-	go func() {
-		defer s.worker.Done()
+	s.worker.Go(func() {
 		t := time.NewTicker(15 * time.Second)
 		defer t.Stop()
 		for {
@@ -75,7 +73,7 @@ func newStream(w http.ResponseWriter, r *http.Request, protocol, id, model strin
 				s.mu.Unlock()
 			}
 		}
-	}()
+	})
 	return s
 }
 func (s *protocolStream) write(v string) {
@@ -232,14 +230,7 @@ func (s *protocolStream) complete(r *Result, response M) M {
 		return response
 	}
 	if s.protocol == "chat" {
-		finish := "stop"
-		if lengthFinish(r.FinishReason) {
-			finish = "length"
-		}
-		if len(r.Calls) > 0 {
-			finish = "tool_calls"
-		}
-		s.chunk(M{}, finish)
+		s.chunk(M{}, chatFinishReason(r))
 		if s.includeUsage {
 			s.write("data: " + js(M{"id": s.id, "object": "chat.completion.chunk", "created": s.created, "model": s.model, "choices": []any{}, "usage": chatUsage(r.Usage)}) + "\n\n")
 		}

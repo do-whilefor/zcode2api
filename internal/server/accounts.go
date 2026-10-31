@@ -155,8 +155,7 @@ func (a *App) fetchBalance(ctx context.Context, r M) (M, error) {
 		balances = append(balances, b)
 		added := false
 		for _, c := range arr(b["capabilities"]) {
-			if strings.HasPrefix(str(c), "model:") {
-				s := strings.TrimPrefix(str(c), "model:")
+			if s, ok := strings.CutPrefix(str(c), "model:"); ok {
 				if !contains(caps, s) {
 					caps = append(caps, s)
 				}
