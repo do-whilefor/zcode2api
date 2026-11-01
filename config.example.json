@@ -4,11 +4,29 @@
   "gateway_port": 6780,
   "host": "127.0.0.1",
   "poll_interval_sec": 60,
+  "outbound_proxy": {
+    "enabled": false,
+    "rotation_enabled": false,
+    "rotation_interval_sec": 0,
+    "source": "manual",
+    "urls": [],
+    "subscription_url": "",
+    "subscription_filter": "",
+    "mihomo_path": "mihomo",
+    "refresh_interval_sec": 3600
+  },
   "http": {
     "client_version": "0.17.0",
     "first_token_timeout_ms": 60000,
     "idle_timeout_ms": 120000,
-    "total_timeout_ms": 0
+    "total_timeout_ms": 0,
+    "captcha": {
+      "mode": "off",
+      "node_path": "node",
+      "jsdom_path": "",
+      "simulate_canvas_webgl": true,
+      "timeout_ms": 30000
+    }
   },
   "retry": {
     "rate_limit_retry_interval_ms": 1000,

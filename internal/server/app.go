@@ -39,6 +39,7 @@ type profileEntry struct {
 type App struct {
 	db                   *sql.DB
 	data, secret         string
+	root                 string
 	log                  *log.Logger
 	logfile              *os.File
 	web                  fs.FS
@@ -65,6 +66,9 @@ type App struct {
 	wg                   sync.WaitGroup
 	webPort, gatewayPort int
 	origin               string
+	captcha              captchaManager
+	proxies              outboundProxyManager
+	mihomoInstallMu      sync.Mutex
 }
 
 func New(root, data string, web fs.FS) (*App, error) {
@@ -88,16 +92,26 @@ func New(root, data string, web fs.FS) (*App, error) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	a := &App{db: d, data: data, secret: secret, log: log.New(out, "", log.LstdFlags), logfile: lf, web: web, cfg: cfg, ctx: ctx, cancel: cancel, states: map[string]*accountState{}, sticky: map[string]stickyEntry{}, sessions: map[string]int64{}, responses: map[string]responseEntry{}, clients: map[string]*http.Client{}, jars: map[string]*diskJar{}, claimLocks: map[string]bool{}, flowLocks: map[string]bool{}, reauth: map[string]int64{}, pollDue: map[string]int64{}, polling: map[string]bool{}, origin: "https://zcode.z.ai"}
+	a.root = root
 	saved := obj(a.setting("config_overrides", M{}))
 	clean := M{}
 	for k, v := range saved {
 		if _, exists := cfg[k]; !exists {
 			continue
 		}
-		if k == "http" || k == "retry" {
+		if k == "http" || k == "retry" || k == "outbound_proxy" {
 			part := M{}
 			for field, value := range obj(v) {
 				if _, exists := obj(cfg[k])[field]; exists {
+					if k == "http" && field == "captcha" {
+						options := M{}
+						for name, option := range obj(value) {
+							if _, exists := obj(obj(cfg[k])[field])[name]; exists {
+								options[name] = option
+							}
+						}
+						value = options
+					}
 					part[field] = value
 				}
 			}
@@ -121,6 +135,7 @@ func New(root, data string, web fs.FS) (*App, error) {
 func (a *App) config() M { a.configMu.RLock(); defer a.configMu.RUnlock(); return clone(a.cfg) }
 func (a *App) Close() {
 	a.cancel()
+	a.closeOutboundProxies()
 	a.wg.Wait()
 	a.mu.Lock()
 	for _, c := range a.clients {

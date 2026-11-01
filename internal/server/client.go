@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -72,15 +73,19 @@ func platform() string {
 	}
 	return p + "-" + arch
 }
-func (a *App) client(account M) (*http.Client, error) {
-	proxy := str(account["proxy_url"])
-	if proxy == "" {
-		proxy = str(a.config()["proxy_url"])
-	}
+func (a *App) client(ctx context.Context) (*http.Client, error) {
+	proxy := selectedProxy(ctx)
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if c := a.clients[proxy]; c != nil {
 		return c, nil
+	}
+	if len(a.clients) >= 128 {
+		for key, cached := range a.clients {
+			cached.CloseIdleConnections()
+			delete(a.clients, key)
+			break
+		}
 	}
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.Proxy = nil
@@ -91,7 +96,7 @@ func (a *App) client(account M) (*http.Client, error) {
 	t.ForceAttemptHTTP2 = true
 	if proxy != "" {
 		u, e := url.Parse(proxy)
-		if e != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") {
+		if e != nil || !validProxy(proxy) {
 			return nil, invalid("proxy_url 仅支持 http(s)://host:port")
 		}
 		t.Proxy = http.ProxyURL(u)
@@ -102,15 +107,23 @@ func (a *App) client(account M) (*http.Client, error) {
 }
 
 type apiResult struct {
-	Status int
-	JSON   M
-	Header http.Header
-	OK     bool
+	Status    int
+	JSON      M
+	Header    http.Header
+	OK        bool
+	errorBody []byte
 }
 
 func validProxy(s string) bool {
 	u, e := url.Parse(s)
-	return e == nil && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
+	if e != nil || u.Hostname() == "" || (u.Scheme != "http" && u.Scheme != "https") || (u.Path != "" && u.Path != "/") || u.RawQuery != "" || u.Fragment != "" || strings.ContainsAny(s, "\r\n\x00") {
+		return false
+	}
+	if port := u.Port(); port != "" {
+		n, err := strconv.Atoi(port)
+		return err == nil && n > 0 && n <= 65535
+	}
+	return !strings.HasSuffix(u.Host, ":")
 }
 
 func (a *App) api(ctx context.Context, account M, method, path, token string, body any, headers M, jar *diskJar) (apiResult, error) {
@@ -119,6 +132,11 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 	}
 	ctx, cancel := context.WithTimeout(ctx, 25*time.Second)
 	defer cancel()
+	ctx, release, err := a.pinOutboundProxy(ctx, account)
+	if err != nil {
+		return apiResult{}, err
+	}
+	defer release()
 	var reader io.Reader
 	if body != nil {
 		reader = strings.NewReader(js(body))
@@ -146,7 +164,7 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 			req.Header.Set("Cookie", s)
 		}
 	}
-	c, e := a.client(account)
+	c, e := a.client(ctx)
 	if e != nil {
 		return apiResult{}, e
 	}
@@ -166,7 +184,11 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 		return apiResult{}, invalid("上游响应超过 32MB")
 	}
 	j := obj(parse(string(b), nil))
-	return apiResult{res.StatusCode, j, res.Header, res.StatusCode == 200 && (codeIs(j["code"], 0) || codeIs(j["code"], 200))}, nil
+	result := apiResult{Status: res.StatusCode, JSON: j, Header: res.Header, OK: res.StatusCode == 200 && (codeIs(j["code"], 0) || codeIs(j["code"], 200))}
+	if !result.OK {
+		result.errorBody = append([]byte(nil), b[:min(len(b), 64<<10)]...)
+	}
+	return result, nil
 }
 func apiFailure(r apiResult, label string) error {
 	return &Failure{Status: r.Status, Code: str(first(r.JSON["code"], r.Status)), Message: label + ": " + str(first(r.JSON["msg"], r.JSON["message"], r.Status))}

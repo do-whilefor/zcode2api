@@ -72,7 +72,7 @@ try {
         Copy-Item -LiteralPath (Join-Path $projectRoot "scripts/$name") -Destination (Join-Path $packageRoot "scripts/$name")
     }
     $binaryVersion = & (Join-Path $packageRoot 'zcode2api.exe') --version
-    if ($LASTEXITCODE -ne 0 -or $binaryVersion -notmatch '^zcode2api (dev|v\d+\.\d+\.\d+)$') { throw 'Binary version flag failed.' }
+    if ($LASTEXITCODE -ne 0 -or $binaryVersion -notmatch '^zcode2api (dev|ci|v\d+\.\d+\.\d+)$') { throw 'Binary version flag failed.' }
     $env:ZCODE2API_WEB_PORT = '0'
     $env:ZCODE2API_GATEWAY_PORT = '0'
     $env:ZCODE2API_HOST = '127.0.0.1'

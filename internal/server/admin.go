@@ -198,36 +198,65 @@ func (a *App) adminRoute(r *http.Request, b M) (any, int, error) {
 		return M{"ok": e == nil, "id": id}, 200, e
 	case "GET /api/settings":
 		out := M{}
-		for _, k := range []string{"poll_interval_sec", "poll_jitter_sec", "poll_concurrency", "claim_auto_enabled", "claim_auto_min", "default_reasoning_level", "http", "inference_driver", "app_version", "aliases", "retry", "web_port", "gateway_port"} {
+		for _, k := range []string{"poll_interval_sec", "poll_jitter_sec", "poll_concurrency", "claim_auto_enabled", "claim_auto_min", "default_reasoning_level", "http", "outbound_proxy", "inference_driver", "app_version", "aliases", "retry", "web_port", "gateway_port"} {
 			out[k] = cfg[k]
 		}
 		over := obj(a.setting("config_overrides", M{}))
 		delete(over, "notify_webhook")
 		out["overrides"] = over
 		return out, 200, nil
+	case "GET /api/settings/proxy/mihomo":
+		return a.mihomoStatus(), 200, nil
+	case "POST /api/settings/proxy/mihomo/install":
+		result, err := a.installMihomo(ctx)
+		if err != nil {
+			return M{"ok": false, "error": err.Error()}, 400, nil
+		}
+		return result, 200, nil
+	case "POST /api/settings/proxy/test":
+		if e := validateOutboundProxy(b["outbound_proxy"]); e != nil {
+			return M{"ok": false, "error": e.Error()}, 400, nil
+		}
+		result, e := a.testOutboundProxies(ctx, obj(b["outbound_proxy"]))
+		if e != nil {
+			return M{"ok": false, "error": asProxyFailure(e).Message}, 502, nil
+		}
+		return result, 200, nil
 	case "PUT /api/settings":
 		if e := validateSettings(b); e != nil {
 			return M{"ok": false, "error": e.Error()}, 400, nil
 		}
-		over := obj(a.setting("config_overrides", M{}))
-		delete(over, "notify_webhook")
 		allowed := map[string]bool{}
-		for _, k := range strings.Fields("poll_interval_sec poll_jitter_sec poll_concurrency claim_auto_enabled claim_auto_min default_reasoning_level app_version aliases retry inference_driver http") {
+		for _, k := range strings.Fields("poll_interval_sec poll_jitter_sec poll_concurrency claim_auto_enabled claim_auto_min default_reasoning_level app_version aliases retry inference_driver http outbound_proxy") {
 			allowed[k] = true
 		}
 		a.configMu.Lock()
+		over := obj(a.setting("config_overrides", M{}))
+		delete(over, "notify_webhook")
+		next := clone(a.cfg)
 		for k, v := range b {
 			if !allowed[k] {
 				continue
 			}
-			if k == "retry" || k == "http" {
-				v = deepMerge(obj(a.cfg[k]), obj(v), false)
+			if k == "retry" || k == "http" || k == "outbound_proxy" {
+				v = deepMerge(obj(next[k]), obj(v), false)
 			}
 			over[k] = v
-			a.cfg[k] = v
+			next[k] = v
+		}
+		if e := validateOutboundProxy(next["outbound_proxy"]); e != nil {
+			a.configMu.Unlock()
+			return M{"ok": false, "error": e.Error()}, 400, nil
+		}
+		proxyChanged := js(next["outbound_proxy"]) != js(a.cfg["outbound_proxy"])
+		e := a.setSetting("config_overrides", over)
+		if e == nil {
+			a.cfg = next
 		}
 		a.configMu.Unlock()
-		e := a.setSetting("config_overrides", over)
+		if proxyChanged && e == nil {
+			a.resetOutboundProxies()
+		}
 		return ok, 200, e
 	case "GET /api/audit":
 		return a.rows("SELECT * FROM audit_log ORDER BY ts DESC LIMIT ?", limitQuery(r, 100, 300)), 200, nil
@@ -358,6 +387,11 @@ func (a *App) pendingFlows() []any {
 var versionPattern = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 
 func validateSettings(b M) error {
+	if value, present := b["outbound_proxy"]; present {
+		if err := validateOutboundProxyFields(value); err != nil {
+			return err
+		}
+	}
 	if v, ok := b["app_version"]; ok && !versionPattern.MatchString(str(v)) {
 		return fmt.Errorf("额度与领卡 API 版本须为三段数字，例如 3.16.2")
 	}
@@ -385,6 +419,11 @@ func validateSettings(b M) error {
 		}
 		if v, ok := h["client_version"]; ok && !versionPattern.MatchString(str(v)) {
 			return fmt.Errorf("推理 API 版本须为三段数字，例如 0.17.0")
+		}
+		if v, ok := h["captcha"]; ok {
+			if err := validateCaptchaOptions(v); err != nil {
+				return err
+			}
 		}
 	}
 	for _, k := range []string{"poll_interval_sec", "poll_concurrency", "claim_auto_min"} {

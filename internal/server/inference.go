@@ -50,7 +50,7 @@ func classify(f *Failure) *Failure {
 		kind = "context"
 	case "1113", "1309", "1311", "1304", "1308", "1310", "1313", "1008", "1314", "1315":
 		kind = "terminal"
-	case "3012":
+	case "3012", "CAPTCHA_VERIFY_FAILED", "coding_plan_security_verification_required", "captcha_expired", "captcha_invalid", "F008", "F018", "F019":
 		kind = "risk"
 	case "timeout":
 		kind, retry = "timeout", true

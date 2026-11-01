@@ -93,7 +93,7 @@ function toast(msg, type = '') {
   setTimeout(() => {
     t.classList.add('out');
     t.addEventListener('transitionend', () => t.remove(), { once: true });
-    setTimeout(() => t.remove(), 400); // transitionend 兜底
+    setTimeout(() => t.remove(), 400);
   }, 2500);
 }
 
@@ -178,8 +178,6 @@ function setTheme(mode) {
   else localStorage.setItem('z2a_theme', mode);
   const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', dark);
-  const selector = $('#s-theme');
-  if (selector) { selector.value = mode; syncSelect(selector); }
   applyThemeBtn();
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -218,9 +216,8 @@ function restoreRoute(route) {
   if (currentPage === 'claims') window._claimsFilter = { account: (q.account || 'all').slice(0, 160), view: valid(q.view, ['ready', 'pending', 'error'], 'all'), historyPage: page };
 }
 async function mayLeaveSettings() {
-  if (currentPage !== 'settings' || !settingsDirty) return true;
-  if (settingsSaving) { toast('正在保存设置，请稍候'); return false; }
-  return confirmAction('设置尚未保存', '修改已保留为本标签页的草稿，返回设置可继续编辑。确定离开？', '保留草稿并离开', false);
+  if (currentPage === 'settings' && settingsSaving) { toast('正在保存设置，请稍候'); return false; }
+  return true;
 }
 async function navigateTo(page) {
   if (!PAGES.some(p => p[0] === page) || page === currentPage) return false;
@@ -240,9 +237,6 @@ window.addEventListener('hashchange', async () => {
   delete $('#main').dataset.fp;
   syncRoute(); renderNav(); await render();
   window.scrollTo({ top: 0, behavior: 'instant' });
-});
-window.addEventListener('beforeunload', e => {
-  if (currentPage === 'settings' && settingsDirty) { e.preventDefault(); e.returnValue = ''; }
 });
 function renderNav() {
   const nav = $('#nav');
@@ -776,7 +770,7 @@ async function onAccountAction(e) {
         <option value="">待分组</option>
         ${groups.map((g) => `<option value="${esc(g.id)}" ${a.group_id === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}
       </select></div>
-      <div class="kv" style="margin-bottom:6px"><b>出站代理</b><input id="e-proxy" placeholder="http://127.0.0.1:7890（留空直连）" value="${esc(a.proxy_url || '')}"></div>
+      <div class="kv" style="margin-bottom:6px"><b>出站代理</b><input id="e-proxy" placeholder="http://127.0.0.1:7890（留空跟随全局设置）" value="${esc(a.proxy_url || '')}"></div>
       <p class="muted" style="margin:0 0 12px">该账号全部出站（推理+平台轮询）走此代理；保存后对下一次 HTTP 请求生效。</p>
       <div class="row"><button class="btn primary" id="e-save">保存</button></div></div>`);
     const m = modal('编辑账号', form);
@@ -946,7 +940,6 @@ function noteFlowSeen(flowId) {
 function startOauthWatcher() {
   if (window._oauthWatchTimer) clearInterval(window._oauthWatchTimer);
   window._oauthWatchTimer = setInterval(async () => {
-    // 弹窗自行轮询，避免重复通知。
     if (!TOKEN || document.hidden || document.querySelector('.modal-bg')) return;
     let w;
     try { w = await api('/api/accounts/oauth/watch'); } catch { return; }
@@ -1243,22 +1236,53 @@ async function pageGroups(main) {
 }
 
 async function pageSettings(main) {
-  const s = await api('/api/settings');
+  const [s, mihomo] = await Promise.all([api('/api/settings'), api('/api/settings/proxy/mihomo').catch(() => ({ unavailable: true }))]);
+  const [mihomoOS, mihomoArch] = (mihomo.platform || '').split('/');
+  const mihomoTarget = mihomo.platform ? `${({ windows: 'Windows', linux: 'Linux', darwin: 'macOS' })[mihomoOS] || mihomoOS} / ${({ amd64: 'x64', arm64: 'ARM64' })[mihomoArch] || mihomoArch}` : '';
   const httpParams = { ...s.http };
+  const captcha = { mode: 'off', node_path: 'node', jsdom_path: '', simulate_canvas_webgl: true, timeout_ms: 30000, ...s.http.captcha };
+  const proxy = { enabled: false, rotation_enabled: false, rotation_interval_sec: 0, source: 'manual', urls: [], subscription_url: '', subscription_filter: '', mihomo_path: 'mihomo', refresh_interval_sec: 3600, ...s.outbound_proxy };
   delete httpParams.client_version;
-  main.innerHTML = `${pagehead('设置', '运行参数保存后即时生效，外观修改立即应用。')}
+  delete httpParams.captcha;
+  main.innerHTML = `${pagehead('设置', '运行参数保存后即时生效。',
+    '<button type="submit" form="settings-form" class="btn primary settings-save" id="s-save" aria-describedby="settings-state" disabled>保存设置</button>')}
+    <p id="settings-state" class="visually-hidden" role="status" aria-live="polite"></p>
     <form id="settings-form" class="settings-form" novalidate>
-      <section class="settings-panel formcard"><div><h2>外观</h2><p>选择适合当前环境的显示方式。</p></div><label class="f">主题<select id="s-theme"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select><small>立即应用，无需保存</small></label></section>
+      <p id="settings-error" class="inline-notice error hidden" role="alert"></p>
       <section class="settings-panel formcard"><div><h2>额度轮询</h2><p>控制账号余额与状态的自动同步。</p></div><div class="settings-fields">
         <label class="f">轮询间隔（秒）<input id="s-poll" type="number" min="1" step="1" required value="${s.poll_interval_sec}"><small>两次余额检查之间的基础间隔</small></label>
         <label class="f">随机抖动（秒）<input id="s-jitter" type="number" min="0" step="1" required value="${s.poll_jitter_sec}"><small>分散多个账号的请求时间</small></label>
         <label class="f">轮询并发<input id="s-conc" type="number" min="1" step="1" required value="${s.poll_concurrency}"><small>同时检查余额的账号数量</small></label>
       </div></section>
-      <section class="settings-panel formcard"><div><h2>自动领卡</h2><p>定期检查并领取账号可用的额度卡。</p></div><div class="settings-fields">
-        <label class="settings-check"><input id="s-claim" type="checkbox" ${s.claim_auto_enabled ? 'checked' : ''}><span>启用自动领卡<small>仅领取上游实际提供的额度卡</small></span></label>
-        <label class="f">检查周期（分钟）<input id="s-claimmin" type="number" min="1" step="1" required value="${s.claim_auto_min}"><small>关闭自动领卡后不会按此周期执行</small></label>
+      <section class="settings-panel formcard"><div><h2>上游安全验证</h2><p>为模型请求申请一次性验证票据。</p></div><div class="network-settings-fields">
+        <div class="settings-fields"><label class="f">请求前验证策略<select id="s-captcha-mode" aria-describedby="s-captcha-mode-hint"><option value="off">关闭验证</option><option value="auto">按上游要求验证</option><option value="always">每次请求前验证（场景启用时）</option></select><small id="s-captcha-mode-hint" aria-live="polite"></small></label>
+          <label class="f">验证等待上限（毫秒）<input id="s-captcha-timeout" type="number" min="5000" max="120000" step="1" required value="${captcha.timeout_ms}"><small>仅用于安全验证；30000 毫秒 = 30 秒。</small></label></div>
+        <label class="settings-check"><input id="s-captcha-canvas" type="checkbox" ${captcha.simulate_canvas_webgl ? 'checked' : ''}><span>启用浏览器接口模拟<small>为 SDK 补充 Canvas、WebGL 等兼容接口；不保证通过验证。</small></span></label>
+        <details class="network-advanced"><summary>Node.js 与 jsdom 路径</summary><div class="network-settings-fields">
+          <label class="f">Node.js 可执行文件<input id="s-captcha-node" value="${esc(captcha.node_path)}" placeholder="node"></label>
+          <label class="f">jsdom 所在目录<input id="s-captcha-jsdom" value="${esc(captcha.jsdom_path)}" placeholder="留空使用程序根目录下的 captcha_node"><small>填写包含 node_modules/jsdom 的目录。首次使用请安装 captcha_node 的运行依赖。</small></label>
+        </div></details>
       </div></section>
-      <section class="settings-panel formcard"><div><h2>网关与模型</h2><p>作为未指定思考档位的客户端请求的默认值。</p></div><label class="f">默认思考档位<select id="s-level"><option value="low">低（更快）</option><option value="high">高（深入思考）</option><option value="max">最高</option></select><small>请求自身指定的档位优先</small></label>
+      <section class="settings-panel formcard"><div><h2>出站代理</h2><p>用于服务器访问上游。账号单独设置的代理优先。</p></div><div class="network-settings-fields">
+        <div class="settings-fields"><label class="settings-check"><input id="s-proxy-enabled" type="checkbox" ${proxy.enabled ? 'checked' : ''}><span>启用全局代理<small>关闭后全局使用直连</small></span></label>
+          <label class="settings-check"><input id="s-proxy-rotation" type="checkbox" ${proxy.rotation_enabled ? 'checked' : ''}><span>启用代理轮询<small>关闭时固定使用列表中第一个节点</small></span></label>
+          <label class="f">轮换间隔（秒）<input id="s-proxy-interval" type="number" min="0" max="86400" step="1" value="${proxy.rotation_interval_sec}"><small>0 表示每次操作轮换；正数表示到期后新操作切换节点。</small></label>
+          <label class="f">代理来源<select id="s-proxy-source"><option value="manual">HTTP / HTTPS 地址列表</option><option value="subscription">节点订阅（需要 Mihomo）</option></select></label></div>
+        <div id="proxy-manual-fields"><label class="f">代理地址（每行一个）<textarea id="s-proxy-urls" class="code-input" rows="3" spellcheck="false" placeholder="http://127.0.0.1:7890&#10;http://user:password@proxy.example:8080">${esc(proxy.urls.join('\n'))}</textarea><small>仅支持 HTTP/HTTPS 代理；订阅链接请切换到“节点订阅”。</small></label></div>
+        <div id="proxy-subscription-fields" class="network-settings-fields">
+          <label class="f">HTTPS 订阅地址<input id="s-proxy-subscription" type="password" autocomplete="off" value="${esc(proxy.subscription_url)}" placeholder="https://provider.example/subscribe?token=…"><small>支持 Base64 或 URI 列表中的 VLESS TCP/WS、Hysteria2、HTTP/HTTPS 节点。</small></label>
+          <button type="button" class="text-action" id="s-proxy-reveal" aria-pressed="false">显示订阅地址</button>
+          <label class="f">节点名称筛选（正则表达式）<input id="s-proxy-filter" value="${esc(proxy.subscription_filter)}" placeholder="例如：香港(高速0[2-5]|专线0[12])"><small>留空使用所有受支持节点，最多 64 个。请只选用已确认可正常推理的节点。</small></label>
+          <div class="settings-fields"><label class="f">Mihomo 可执行文件<input id="s-proxy-mihomo" value="${esc(proxy.mihomo_path)}" placeholder="mihomo"><small>可填写已有程序路径，或使用下方安装按钮。</small></label>
+            <label class="f">订阅刷新间隔（秒）<input id="s-proxy-refresh" type="number" min="60" max="86400" step="1" value="${proxy.refresh_interval_sec}"><small>按需刷新，失败时继续使用仍在运行的旧节点。</small></label></div>
+          <div class="mihomo-install"><div class="proxy-test-actions"><button type="button" class="btn" id="s-mihomo-install" ${mihomo.installed || mihomo.supported === false ? 'disabled' : ''}>${mihomo.installed ? 'Mihomo 已就绪' : '安装 Mihomo'}</button><small id="s-mihomo-status" role="status" aria-live="polite">${mihomo.installed ? '已检测到可执行文件' : mihomo.supported === false ? '当前平台请手动安装 Mihomo' : mihomo.unavailable ? '暂时无法检测安装状态' : '尚未安装'}</small></div><small id="s-mihomo-target">${mihomoTarget ? `安装目标：服务端 ${esc(mihomoTarget)}；${mihomo.supported === false ? '该平台暂不支持在线安装。' : '自动匹配安装包。'}` : '暂时无法识别服务端系统与 CPU 架构，请稍后重试。'}</small><small>仅点击后从官方 GitHub 下载 ${esc(mihomo.version || '固定版本')}，校验 SHA-256 并安装到服务端数据目录。下载使用服务器直连；也可<a href="https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.33" target="_blank" rel="noopener noreferrer">手动下载</a>。</small></div>
+        </div>
+        <p class="inline-notice">轮换仅影响新操作；同次配置获取、验证码验证和推理固定使用同一代理入口。连接失败时跳过该节点 30 秒；风险拒绝会结束本次请求。</p>
+        <div class="proxy-test-actions"><button type="button" class="btn" id="s-proxy-test">检测当前代理配置</button><small>不保存设置，不发送账号令牌，不消耗模型额度。</small></div>
+        <div id="s-proxy-result" class="proxy-test-results hidden" role="status" aria-live="polite"></div>
+        <small class="muted">代理地址和订阅链接不会写入浏览器草稿，请及时保存。</small>
+      </div></section>
+      <section class="settings-panel formcard"><div><h2>网关与模型</h2><p>配置上游版本、模型别名与请求参数。</p></div>
         <details class="adv-box"><summary>高级参数：客户端版本、模型别名、重试与 HTTP 超时</summary><div class="advanced-fields">
           <label class="f">额度与领卡 API 版本<input id="s-ver" value="${esc(s.app_version)}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 3.16.2" required><small>用于管理请求的 User-Agent、X-ZCode-App-Version 和 app_version 参数。</small></label>
           <label class="f">推理 API 版本<input id="s-http-version" value="${esc(s.http.client_version || '0.17.0')}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 0.17.0" required><small>对应 http.client_version，仅调整推理请求的版本标识。</small></label>
@@ -1268,27 +1292,25 @@ async function pageSettings(main) {
           <label class="f" for="s-http">HTTP 超时（JSON 对象，毫秒）<small>total_timeout_ms 为 0 表示不限制整轮时长；client_version 使用上方“推理 API 版本”设置。</small></label><textarea id="s-http" class="code-input" spellcheck="false" rows="6" aria-describedby="s-http-hint">${esc(JSON.stringify(httpParams, null, 2))}</textarea><p id="s-http-hint" class="json-hint" data-for="s-http" aria-live="polite"></p>
         </div></details>
       </section>
-      <div class="settings-savebar"><div><p id="settings-state" role="status" aria-live="polite"></p><button type="button" class="text-action hidden" id="s-discard">放弃修改</button></div><button type="submit" class="btn primary" id="s-save">保存设置</button></div>
-      <p id="settings-error" class="inline-notice error hidden" role="alert"></p>
     </form>
     <p class="muted settings-ports">管理端口 ${RUNTIME?.web_port ?? s.web_port} · 网关端口 ${RUNTIME?.gateway_port ?? s.gateway_port}。端口修改需编辑 config.json 后重启服务。</p>`;
-  const form = $('#settings-form'), save = $('#s-save'), status = $('#settings-state'), discard = $('#s-discard');
-  $('#s-theme').value = localStorage.getItem('z2a_theme') || 'system';
-  $('#s-theme').addEventListener('change', e => setTheme(e.target.value));
-  $('#s-level').value = s.default_reasoning_level;
-  const ids = ['s-poll', 's-jitter', 's-conc', 's-claim', 's-claimmin', 's-level', 's-ver', 's-http-version', 's-aliases', 's-retry', 's-http'];
+  const form = $('#settings-form'), save = $('#s-save'), status = $('#settings-state');
+  $('#s-captcha-mode').value = captcha.mode;
+  $('#s-proxy-source').value = proxy.source;
+  const ids = ['s-poll', 's-jitter', 's-conc', 's-ver', 's-http-version', 's-aliases', 's-retry', 's-http', 's-captcha-mode', 's-captcha-timeout', 's-captcha-canvas', 's-captcha-node', 's-captcha-jsdom', 's-proxy-enabled', 's-proxy-rotation', 's-proxy-interval', 's-proxy-source', 's-proxy-urls', 's-proxy-subscription', 's-proxy-filter', 's-proxy-mihomo', 's-proxy-refresh'];
   const values = () => Object.fromEntries(ids.map(id => [id, $('#' + id).type === 'checkbox' ? $('#' + id).checked : $('#' + id).value]));
   const apply = data => ids.forEach(id => { if (Object.hasOwn(data, id)) { const input = $('#' + id); if (input.type === 'checkbox') input.checked = !!data[id]; else input.value = data[id]; syncSelect(input); } });
-  let original = values(), fingerprint = JSON.stringify(original), savedAt = '';
+  let fingerprint = JSON.stringify(values()), savedAt = '';
   const draftKey = 'z2a_settings_draft';
   const updateDirty = () => {
     settingsDirty = JSON.stringify(values()) !== fingerprint;
-    discard.classList.toggle('hidden', !settingsDirty);
     save.disabled = !settingsDirty || settingsSaving;
-    status.textContent = settingsSaving ? '正在保存…' : settingsDirty ? '有未保存修改 · 草稿已保留在当前标签页' : savedAt || '所有设置已保存';
-    status.classList.toggle('warn-text', settingsDirty);
-    try { if (settingsDirty) sessionStorage.setItem(draftKey, JSON.stringify(values())); else sessionStorage.removeItem(draftKey); }
+    save.textContent = settingsSaving ? '正在保存…' : savedAt && !settingsDirty ? '已保存' : '保存设置';
+    save.setAttribute('aria-busy', String(settingsSaving));
+    status.textContent = settingsSaving ? '正在保存…' : settingsDirty ? '有未保存修改 · 普通参数草稿已保留' : savedAt || '所有设置已保存';
+    try { if (settingsDirty) { const draft = values(); delete draft['s-proxy-urls']; delete draft['s-proxy-subscription']; sessionStorage.setItem(draftKey, JSON.stringify(draft)); } else sessionStorage.removeItem(draftKey); }
     catch { if (settingsDirty) status.textContent = '有未保存修改 · 浏览器暂时无法保存草稿，请及时保存'; }
+    save.title = status.textContent;
   };
   try {
     const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
@@ -1297,6 +1319,12 @@ async function pageSettings(main) {
         const oldHttp = JSON.parse(draft['s-http']);
         if (oldHttp && Object.hasOwn(oldHttp, 'client_version') && !Object.hasOwn(draft, 's-http-version')) {
           draft['s-http-version'] = String(oldHttp.client_version); delete oldHttp.client_version; draft['s-http'] = JSON.stringify(oldHttp, null, 2);
+        }
+        if (oldHttp?.captcha) {
+          for (const [field, id] of Object.entries({ mode: 's-captcha-mode', timeout_ms: 's-captcha-timeout', simulate_canvas_webgl: 's-captcha-canvas', node_path: 's-captcha-node', jsdom_path: 's-captcha-jsdom' })) {
+            if (Object.hasOwn(oldHttp.captcha, field) && !Object.hasOwn(draft, id)) draft[id] = oldHttp.captcha[field];
+          }
+          delete oldHttp.captcha; draft['s-http'] = JSON.stringify(oldHttp, null, 2);
         }
       } catch { }
       apply(draft);
@@ -1310,6 +1338,7 @@ async function pageSettings(main) {
         const parsed = JSON.parse(box.value);
         if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('请输入 JSON 对象，而非数组或其他值');
         if (id === 's-http' && Object.hasOwn(parsed, 'client_version')) throw new Error('请在上方“推理 API 版本”字段设置 client_version，并从此处移除该键');
+        if (id === 's-http' && Object.hasOwn(parsed, 'captcha')) throw new Error('请在上方“上游安全验证”设置验证码，并从此处移除 captcha');
         box.classList.remove('invalid'); box.setAttribute('aria-invalid', 'false'); hint.textContent = ''; hint.classList.remove('error');
       } catch (error) {
         valid = false; box.classList.add('invalid'); box.setAttribute('aria-invalid', 'true'); hint.textContent = '配置格式错误：' + error.message; hint.classList.add('error');
@@ -1317,13 +1346,55 @@ async function pageSettings(main) {
     }
     return valid;
   };
-  form.addEventListener('input', e => { if (ids.includes(e.target.id)) { validateJSON(); updateDirty(); } });
-  form.addEventListener('change', e => { if (ids.includes(e.target.id)) updateDirty(); });
-  discard.addEventListener('click', async () => {
-    if (!await confirmAction('放弃未保存修改', '当前设置草稿将被清除，恢复到上次保存的值。', '放弃修改')) return;
-    apply(original); validateJSON(); updateDirty();
+  const outboundValues = (data = values()) => ({ enabled: data['s-proxy-enabled'], rotation_enabled: data['s-proxy-rotation'], rotation_interval_sec: Number(data['s-proxy-interval']), source: data['s-proxy-source'], urls: [...new Set(data['s-proxy-urls'].split(/\r?\n/).map(x => x.trim()).filter(Boolean))], subscription_url: data['s-proxy-subscription'].trim(), subscription_filter: data['s-proxy-filter'], mihomo_path: data['s-proxy-mihomo'].trim() || 'mihomo', refresh_interval_sec: Number(data['s-proxy-refresh']) || 3600 });
+  const captchaModeHints = {
+    off: '直接发送模型请求，不运行验证 SDK。',
+    auto: '上游要求模型请求验证时，才运行 SDK 获取票据。',
+    always: '上游启用验证场景时，每次模型请求前都获取票据。',
+  };
+  const syncNetworkFields = () => {
+    $('#s-captcha-mode-hint').textContent = captchaModeHints[$('#s-captcha-mode').value] || '';
+    const subscription = $('#s-proxy-source').value === 'subscription', enabled = $('#s-proxy-enabled').checked;
+    $('#proxy-manual-fields').hidden = subscription;
+    $('#proxy-subscription-fields').hidden = !subscription;
+    $('#s-proxy-urls').required = enabled && !subscription;
+    $('#s-proxy-urls').disabled = subscription;
+    $('#s-proxy-interval').disabled = !enabled || !$('#s-proxy-rotation').checked;
+    $('#s-proxy-interval').required = !$('#s-proxy-interval').disabled;
+    for (const id of ['s-proxy-subscription', 's-proxy-filter', 's-proxy-mihomo', 's-proxy-refresh']) $('#' + id).disabled = !subscription;
+    $('#s-proxy-subscription').required = enabled && subscription;
+    $('#s-proxy-refresh').required = subscription;
+  };
+  form.addEventListener('input', e => { if (ids.includes(e.target.id)) { validateJSON(); syncNetworkFields(); updateDirty(); if (e.target.id.startsWith('s-proxy-')) $('#s-proxy-result').classList.add('hidden'); } });
+  form.addEventListener('change', e => { if (ids.includes(e.target.id)) { syncNetworkFields(); updateDirty(); } });
+  $('#s-proxy-reveal').addEventListener('click', e => { const field = $('#s-proxy-subscription'), reveal = field.type === 'password'; field.type = reveal ? 'text' : 'password'; e.target.textContent = reveal ? '隐藏订阅地址' : '显示订阅地址'; e.target.setAttribute('aria-pressed', String(reveal)); });
+  $('#s-mihomo-install').addEventListener('click', async () => {
+    const button = $('#s-mihomo-install'), result = $('#s-mihomo-status');
+    button.disabled = true; btnLoading(button, true); result.textContent = '正在下载并校验 Mihomo，最长约 3 分钟…';
+    let installed = false;
+    try {
+      const response = await api('/api/settings/proxy/mihomo/install', { method: 'POST', body: {} });
+      if (response.ok === false || !response.path) throw new Error(response.error || '安装失败');
+      installed = true;
+      if (!form.isConnected) return;
+      $('#s-proxy-mihomo').value = response.path;
+      $('#s-proxy-result').classList.add('hidden');
+      updateDirty();
+      result.textContent = `已安装 ${response.version}，路径已填入，请保存设置。`;
+    } catch (error) { result.textContent = '安装失败：' + error.message; }
+    finally { btnLoading(button, false); button.disabled = installed; if (installed) button.textContent = 'Mihomo 已就绪'; }
   });
-  validateJSON(); updateDirty();
+  $('#s-proxy-test').addEventListener('click', async () => {
+    const button = $('#s-proxy-test'), result = $('#s-proxy-result'), options = outboundValues(), tested = JSON.stringify(options);
+    button.disabled = true; btnLoading(button, true); result.classList.remove('hidden'); result.textContent = '正在连接并检测出口，请稍候…';
+    try {
+      const response = await api('/api/settings/proxy/test', { method: 'POST', body: { outbound_proxy: options } });
+      if (tested !== JSON.stringify(outboundValues())) { result.textContent = '配置已修改，请重新检测。'; return; }
+      result.innerHTML = `<p>${esc(response.note || '')}</p><ul>${response.results.map(row => `<li><strong>${esc(row.name)}</strong><span class="${row.reachable ? 'ok-text' : 'warn-text'}">${esc(row.message)}${row.status ? ` · HTTP ${Number(row.status)}` : ''} · ${Number(row.elapsed_ms)} ms</span></li>`).join('')}</ul>`;
+    } catch (error) { result.textContent = '检测失败：' + error.message; }
+    finally { button.disabled = false; btnLoading(button, false); }
+  });
+  validateJSON(); syncNetworkFields(); updateDirty();
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (settingsSaving || !settingsDirty) return;
@@ -1338,11 +1409,11 @@ async function pageSettings(main) {
     try {
       const response = await api('/api/settings', { method: 'PUT', body: {
         poll_interval_sec: Number(submitted['s-poll']), poll_jitter_sec: Number(submitted['s-jitter']), poll_concurrency: Number(submitted['s-conc']),
-        claim_auto_enabled: submitted['s-claim'], claim_auto_min: Number(submitted['s-claimmin']), default_reasoning_level: submitted['s-level'], app_version: submitted['s-ver'],
-        inference_driver: 'http', http: { ...JSON.parse(submitted['s-http']), client_version: submitted['s-http-version'] }, aliases: JSON.parse(submitted['s-aliases']), retry: JSON.parse(submitted['s-retry']),
+        app_version: submitted['s-ver'],
+        inference_driver: 'http', http: { ...JSON.parse(submitted['s-http']), client_version: submitted['s-http-version'], captcha: { mode: submitted['s-captcha-mode'], node_path: submitted['s-captcha-node'].trim() || 'node', jsdom_path: submitted['s-captcha-jsdom'].trim(), simulate_canvas_webgl: submitted['s-captcha-canvas'], timeout_ms: Number(submitted['s-captcha-timeout']) } }, outbound_proxy: outboundValues(submitted), aliases: JSON.parse(submitted['s-aliases']), retry: JSON.parse(submitted['s-retry']),
       } });
       if (response.ok === false) throw new Error(response.error || '保存失败');
-      original = submitted; fingerprint = JSON.stringify(submitted);
+      fingerprint = JSON.stringify(submitted);
       savedAt = '已保存并生效 · ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
       toast('设置已保存并生效', 'ok');
     } catch (err) { error.textContent = '保存失败，修改已保留：' + err.message; error.classList.remove('hidden'); }

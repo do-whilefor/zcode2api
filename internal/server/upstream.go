@@ -143,6 +143,40 @@ func providerFailure(v M, status int, retry string) *Failure {
 	return &Failure{Status: status, Code: str(first(e["code"], v["code"], e["type"], "upstream_http_error")), Message: str(first(e["message"], v["msg"], v["message"], fmt.Sprintf("上游 HTTP %d", status))), RetryAfter: retryAfter(retry, time.Now())}
 }
 
+func upstreamHTTPFailure(res *http.Response, body []byte) *Failure {
+	v := obj(parse(string(body), nil))
+	f := providerFailure(v, res.StatusCode, res.Header.Get("Retry-After"))
+	if len(v) > 0 {
+		return f
+	}
+	page := strings.ToLower(string(body))
+	switch {
+	case (res.StatusCode == 403 || res.StatusCode == 405) && strings.Contains(page, "errors.aliyun.com/") && strings.Contains(page, "block_message"):
+		f.Kind, f.Code = "risk", "upstream_waf_blocked"
+		f.Message += "：请求被阿里云 ESA/WAF 拦截，请检查服务器出口或联系上游处理"
+	case strings.TrimSpace(string(body)) == "":
+		f.Message += "：上游返回空响应体"
+	default:
+		f.Message += "：上游返回非 JSON 错误响应"
+	}
+	// Keep only bounded diagnostic headers; never log cookies or the raw block page.
+	details := []string{}
+	for _, key := range []string{"Content-Type", "Server", "Allow", "X-Request-Id", "EagleId"} {
+		value := []rune(strings.Join(strings.Fields(res.Header.Get(key)), " "))
+		if len(value) == 0 {
+			continue
+		}
+		if len(value) > 192 {
+			value = append(value[:192], []rune("…")...)
+		}
+		details = append(details, key+"="+string(value))
+	}
+	if len(details) > 0 {
+		f.Message += "（" + strings.Join(details, "; ") + "）"
+	}
+	return f
+}
+
 var errStopSSE = errors.New("message_stop")
 
 func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (result *Result, failure *Failure) {
@@ -207,25 +241,53 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 		session = hash(o.Affinity)[:32]
 	}
 	r.SessionID = session
-	req, e := http.NewRequestWithContext(ctx, "POST", a.origin+"/api/v1/zcode-plan/anthropic/v1/messages", strings.NewReader(js(o.Upstream)))
+	ctx, release, e := a.pinOutboundProxy(ctx, account)
 	if e != nil {
-		return nil, &Failure{Message: e.Error()}
+		return nil, asProxyFailure(e)
 	}
-	req.Header = a.upstreamHeaders(str(a.tokens(str(account["id"]))["zcode_jwt"]), session, o.ID)
-	client, e := a.client(account)
+	defer release()
+	defer func() {
+		if failure != nil && failure.Kind == "network" && failure.Retryable {
+			a.markProxyNetworkFailure(ctx)
+		}
+	}()
+	client, e := a.client(ctx)
 	if e != nil {
 		return nil, &Failure{Kind: "invalid", Message: e.Error()}
 	}
-	res, e := client.Do(req)
-	if e != nil {
-		return nil, &Failure{Kind: "network", Code: "network", Message: e.Error(), Retryable: true}
+	var res *http.Response
+	for verificationAttempt := 0; ; verificationAttempt++ {
+		verification, f := a.captchaHeaders(ctx, account)
+		if f != nil {
+			return nil, f
+		}
+		req, err := http.NewRequestWithContext(ctx, "POST", a.origin+"/api/v1/zcode-plan/anthropic/v1/messages", strings.NewReader(js(o.Upstream)))
+		if err != nil {
+			return nil, &Failure{Message: err.Error()}
+		}
+		req.Header = a.upstreamHeaders(str(a.tokens(str(account["id"]))["zcode_jwt"]), session, o.ID)
+		for key, values := range verification {
+			req.Header[key] = values
+		}
+		res, e = client.Do(req)
+		if e != nil {
+			return nil, &Failure{Kind: "network", Code: "network", Message: e.Error(), Retryable: true}
+		}
+		resetIdle()
+		if res.StatusCode >= 200 && res.StatusCode < 300 {
+			break
+		}
+		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
+		res.Body.Close()
+		failure := upstreamHTTPFailure(res, b)
+		captchaMode := str(fallback(obj(obj(a.config()["http"])["captcha"])["mode"], "off"))
+		if verificationAttempt == 0 && captchaMode != "off" && captchaExpired(failure) {
+			a.invalidateCaptchaScene()
+			continue
+		}
+		return nil, failure
 	}
 	defer res.Body.Close()
-	resetIdle()
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
-		return nil, providerFailure(obj(parse(string(b), nil)), res.StatusCode, res.Header.Get("Retry-After"))
-	}
 	if !strings.Contains(res.Header.Get("Content-Type"), "text/event-stream") {
 		return nil, &Failure{Status: 502, Message: "上游未返回 SSE 响应"}
 	}

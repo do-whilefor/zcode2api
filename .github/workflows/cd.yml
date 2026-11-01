@@ -3,6 +3,8 @@ name: CD
 on:
   push:
     tags: ['v*']
+  # Manual runs validate the full release pipeline without publishing anything.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,61 +15,14 @@ concurrency:
 
 jobs:
   checks:
-    name: CI
+    name: CI and release validation
     uses: ./.github/workflows/ci.yml
-
-  build:
-    name: Package (${{ matrix.goos }}/${{ matrix.goarch }})
-    needs: checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
-    env:
-      CGO_ENABLED: '0'
-      GOOS: ${{ matrix.goos }}
-      GOARCH: ${{ matrix.goarch }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Build and package
-        shell: bash
-        run: |
-          package="zcode2api_${GITHUB_REF_NAME}_${GOOS}_${GOARCH}"
-          binary=zcode2api
-          if [ "$GOOS" = windows ]; then
-            binary=zcode2api.exe
-          fi
-          mkdir -p "dist/$package"
-          go build -trimpath -ldflags="-s -w -X main.version=${GITHUB_REF_NAME}" -o "dist/$package/$binary" .
-          cp LICENSE README.md SECURITY.md CHANGELOG.md config.example.json "dist/$package/"
-          if [ "$GOOS" = windows ]; then
-            mkdir -p "dist/$package/scripts"
-            cp scripts/start.ps1 scripts/stop.ps1 "dist/$package/scripts/"
-            (cd dist && zip -r "$package.zip" "$package")
-          else
-            tar -czf "dist/$package.tar.gz" -C dist "$package"
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: |
-            dist/*.tar.gz
-            dist/*.zip
-          if-no-files-found: error
-          retention-days: 7
+    with:
+      release_version: ${{ github.ref_type == 'tag' && github.ref_name || format('ci-{0}', github.sha) }}
 
   docker:
     name: Publish Docker image
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -76,30 +31,24 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v6
-
       - name: Set image name
         id: image
         env:
           REPOSITORY: ${{ github.repository }}
         run: echo "name=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-
       - uses: docker/setup-qemu-action@v3
-
       - uses: docker/setup-buildx-action@v3
-
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: docker/metadata-action@v5
         id: meta
         with:
           images: ${{ steps.image.outputs.name }}
           tags: |
             type=semver,pattern={{version}}
-
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -112,8 +61,9 @@ jobs:
           cache-to: type=gha,mode=max
 
   release:
-    name: Publish GitHub Release
-    needs: [build, docker]
+    name: Publish release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [checks, docker]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -124,11 +74,14 @@ jobs:
           pattern: release-*
           merge-multiple: true
           path: dist
-
-      - name: Generate checksums
+      - name: Verify complete artifact set and generate checksums
         working-directory: dist
-        run: sha256sum *.tar.gz *.zip > SHA256SUMS
-
+        shell: bash
+        run: |
+          test "$(find . -maxdepth 1 -name '*.zip' | wc -l)" -eq 2
+          test "$(find . -maxdepth 1 -name '*.tar.gz' | wc -l)" -eq 4
+          sha256sum *.tar.gz *.zip > SHA256SUMS
+          sha256sum -c SHA256SUMS
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -141,3 +94,11 @@ jobs:
             flags+=(--prerelease)
           fi
           gh release create "$TAG" dist/* --verify-tag --title "zcode2api $TAG" --generate-notes "${flags[@]}"
+
+  validation:
+    name: Release validation complete
+    if: github.event_name == 'workflow_dispatch'
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Offline tests, four container variants and six release packages passed. No release or image was published.' >> "$GITHUB_STEP_SUMMARY"
