@@ -1282,7 +1282,9 @@ async function pageSettings(main) {
         <div id="s-proxy-result" class="proxy-test-results hidden" role="status" aria-live="polite"></div>
         <small class="muted">代理地址和订阅链接不会写入浏览器草稿，请及时保存。</small>
       </div></section>
-      <section class="settings-panel formcard"><div><h2>网关与模型</h2><p>配置上游版本、模型别名与请求参数。</p></div>
+      <section class="settings-panel formcard"><div><h2>网关与模型</h2><p>配置上游版本、模型别名与请求参数。</p></div><div class="network-settings-fields">
+        <label class="f">默认思考强度<select id="s-level" required aria-describedby="s-level-hint"><option value="low">低（low）</option><option value="high">高（high）</option><option value="max">最高（max）</option></select><small id="s-level-hint">客户端指定的思考设置优先；未指定时，依次使用密钥默认值和此处设置。低强度仍会开启思考。</small></label>
+        <p class="inline-notice">客户端显式关闭思考时，此设置不会覆盖；始终思考的模型可能返回 1210，请在客户端开启思考。</p>
         <details class="adv-box"><summary>高级参数：客户端版本、模型别名、重试与 HTTP 超时</summary><div class="advanced-fields">
           <label class="f">额度与领卡 API 版本<input id="s-ver" value="${esc(s.app_version)}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 3.16.2" required><small>用于管理请求的 User-Agent、X-ZCode-App-Version 和 app_version 参数。</small></label>
           <label class="f">推理 API 版本<input id="s-http-version" value="${esc(s.http.client_version || '0.17.0')}" pattern="[0-9]+\\.[0-9]+\\.[0-9]+" title="请输入三段数字版本，例如 0.17.0" required><small>对应 http.client_version，仅调整推理请求的版本标识。</small></label>
@@ -1290,14 +1292,15 @@ async function pageSettings(main) {
           <label class="f" for="s-aliases">模型别名（JSON 对象）</label><textarea id="s-aliases" class="code-input" spellcheck="false" rows="5" aria-describedby="s-aliases-hint">${esc(JSON.stringify(s.aliases, null, 2))}</textarea><p id="s-aliases-hint" class="json-hint" data-for="s-aliases" aria-live="polite"></p>
           <label class="f" for="s-retry">重试参数（JSON 对象）</label><textarea id="s-retry" class="code-input" spellcheck="false" rows="8" aria-describedby="s-retry-hint">${esc(JSON.stringify(s.retry, null, 2))}</textarea><p id="s-retry-hint" class="json-hint" data-for="s-retry" aria-live="polite"></p>
           <label class="f" for="s-http">HTTP 超时（JSON 对象，毫秒）<small>total_timeout_ms 为 0 表示不限制整轮时长；client_version 使用上方“推理 API 版本”设置。</small></label><textarea id="s-http" class="code-input" spellcheck="false" rows="6" aria-describedby="s-http-hint">${esc(JSON.stringify(httpParams, null, 2))}</textarea><p id="s-http-hint" class="json-hint" data-for="s-http" aria-live="polite"></p>
-        </div></details>
+        </div></details></div>
       </section>
     </form>
     <p class="muted settings-ports">管理端口 ${RUNTIME?.web_port ?? s.web_port} · 网关端口 ${RUNTIME?.gateway_port ?? s.gateway_port}。端口修改需编辑 config.json 后重启服务。</p>`;
   const form = $('#settings-form'), save = $('#s-save'), status = $('#settings-state');
+  $('#s-level').value = s.default_reasoning_level || 'low';
   $('#s-captcha-mode').value = captcha.mode;
   $('#s-proxy-source').value = proxy.source;
-  const ids = ['s-poll', 's-jitter', 's-conc', 's-ver', 's-http-version', 's-aliases', 's-retry', 's-http', 's-captcha-mode', 's-captcha-timeout', 's-captcha-canvas', 's-captcha-node', 's-captcha-jsdom', 's-proxy-enabled', 's-proxy-rotation', 's-proxy-interval', 's-proxy-source', 's-proxy-urls', 's-proxy-subscription', 's-proxy-filter', 's-proxy-mihomo', 's-proxy-refresh'];
+  const ids = ['s-poll', 's-jitter', 's-conc', 's-level', 's-ver', 's-http-version', 's-aliases', 's-retry', 's-http', 's-captcha-mode', 's-captcha-timeout', 's-captcha-canvas', 's-captcha-node', 's-captcha-jsdom', 's-proxy-enabled', 's-proxy-rotation', 's-proxy-interval', 's-proxy-source', 's-proxy-urls', 's-proxy-subscription', 's-proxy-filter', 's-proxy-mihomo', 's-proxy-refresh'];
   const values = () => Object.fromEntries(ids.map(id => [id, $('#' + id).type === 'checkbox' ? $('#' + id).checked : $('#' + id).value]));
   const apply = data => ids.forEach(id => { if (Object.hasOwn(data, id)) { const input = $('#' + id); if (input.type === 'checkbox') input.checked = !!data[id]; else input.value = data[id]; syncSelect(input); } });
   let fingerprint = JSON.stringify(values()), savedAt = '';
@@ -1409,7 +1412,7 @@ async function pageSettings(main) {
     try {
       const response = await api('/api/settings', { method: 'PUT', body: {
         poll_interval_sec: Number(submitted['s-poll']), poll_jitter_sec: Number(submitted['s-jitter']), poll_concurrency: Number(submitted['s-conc']),
-        app_version: submitted['s-ver'],
+        default_reasoning_level: submitted['s-level'], app_version: submitted['s-ver'],
         inference_driver: 'http', http: { ...JSON.parse(submitted['s-http']), client_version: submitted['s-http-version'], captcha: { mode: submitted['s-captcha-mode'], node_path: submitted['s-captcha-node'].trim() || 'node', jsdom_path: submitted['s-captcha-jsdom'].trim(), simulate_canvas_webgl: submitted['s-captcha-canvas'], timeout_ms: Number(submitted['s-captcha-timeout']) } }, outbound_proxy: outboundValues(submitted), aliases: JSON.parse(submitted['s-aliases']), retry: JSON.parse(submitted['s-retry']),
       } });
       if (response.ok === false) throw new Error(response.error || '保存失败');

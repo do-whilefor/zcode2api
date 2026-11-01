@@ -27,9 +27,16 @@ if (goos === 'windows') {
   assert.equal(bytes.readUInt32LE(0), 0xfeedfacf);
   assert.equal(bytes.readUInt32LE(4), goarch === 'amd64' ? 0x01000007 : 0x0100000c);
 }
-for (const file of ['LICENSE', 'README.md', 'SECURITY.md', 'config.example.json']) fs.copyFileSync(path.join(root, file), path.join(directory, file));
-fs.mkdirSync(path.join(directory, 'captcha_node'));
-for (const file of ['package.json', 'package-lock.json']) fs.copyFileSync(path.join(root, 'captcha_node', file), path.join(directory, 'captcha_node', file));
+const sharedFiles = [
+  'LICENSE', 'README.md', 'CHANGELOG.md', 'SECURITY.md', 'config.example.json',
+  'docs/configuration.md', 'docs/network.md',
+  'captcha_node/package.json', 'captcha_node/package-lock.json',
+];
+for (const file of sharedFiles) {
+  const destination = path.join(directory, file);
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.copyFileSync(path.join(root, file), destination);
+}
 if (goos === 'windows') {
   fs.mkdirSync(path.join(directory, 'scripts'));
   for (const file of ['start.ps1', 'stop.ps1']) fs.copyFileSync(path.join(root, 'scripts', file), path.join(directory, 'scripts', file));
@@ -40,7 +47,7 @@ if (goos === 'windows' && process.platform === 'win32') {
 } else if (goos === 'windows') execFileSync('zip', ['-qr', archive, name], { cwd: output });
 else execFileSync('tar', ['-czf', archive, name], { cwd: output });
 const entries = (goos === 'windows' && process.platform !== 'win32' ? execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8' }) : execFileSync('tar', ['-tf', archive], { encoding: 'utf8' })).trim().split(/\r?\n/).map(entry => entry.replaceAll('\\', '/'));
-for (const file of [binary, 'LICENSE', 'README.md', 'SECURITY.md', 'config.example.json', 'captcha_node/package.json', 'captcha_node/package-lock.json', ...(goos === 'windows' ? ['scripts/start.ps1', 'scripts/stop.ps1'] : [])]) assert.ok(entries.includes(`${name}/${file}`), `Archive missing ${file}`);
+for (const file of [binary, ...sharedFiles, ...(goos === 'windows' ? ['scripts/start.ps1', 'scripts/stop.ps1'] : [])]) assert.ok(entries.includes(`${name}/${file}`), `Archive missing ${file}`);
 assert.ok(entries.every(entry => entry.startsWith(name + '/') && !/(^|\/)(data|node_modules|\.git)(\/|$)/.test(entry) && !entry.endsWith('/config.json')), 'Archive contains runtime data or an unexpected path');
 console.log(`Verified release archive, required files and binary architecture: ${archive}`);
 if (goos === ({ win32: 'windows', linux: 'linux', darwin: 'darwin' })[process.platform] && goarch === (process.arch === 'x64' ? 'amd64' : process.arch)) execFileSync(process.execPath, [path.join(__dirname, 'smoke-server.cjs'), path.join(directory, binary), version], { stdio: 'inherit' });

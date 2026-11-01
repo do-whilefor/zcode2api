@@ -834,7 +834,7 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
 .proxy-test-results ul { display: grid; gap: 10px; margin: 0; padding-left: 18px; }
 .proxy-test-results li > span { display: block; margin-top: 3px; }
 .settings-panel .adv-box { min-width: 0; border-top: 0; padding-top: 0; }
-.settings-panel .adv-box:not([open]) { align-self: center; gap: 0; }
+.settings-panel .adv-box:not([open]) { gap: 0; }
 .settings-panel .adv-box > summary { font-size: 13px; color: var(--foreground); line-height: 1.6; }
 .advanced-fields { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
 .advanced-fields > label:not(:first-child) { margin-top: 4px; }

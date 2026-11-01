@@ -99,7 +99,7 @@ async function settingsPage(draft, installError = '', overrides = {}) {
     pagehead: (title, desc, actions = '') => `<div class="pagehead"><div><h1>${title}</h1><p>${desc}</p></div><div class="acts">${actions}</div></div>`, RUNTIME: null, settingsDirty: false, settingsSaving: false,
     syncSelect() {}, toast() {}, btnLoading() {}, confirmAction: async () => true,
     api: async (url, options = {}) => {
-      if (url === '/api/settings' && !options.method) return settingsFixture();
+      if (url === '/api/settings' && !options.method) return { ...settingsFixture(), ...overrides.settings };
       if (url === '/api/settings/proxy/mihomo') return { installed: false, supported: true, version: 'v1.19.33', platform: 'windows/amd64', ...overrides.mihomo };
       calls.push({ url, ...JSON.parse(JSON.stringify(options)) });
       if (url === '/api/settings' && options.method === 'PUT') {
@@ -131,6 +131,39 @@ async function settingsPage(draft, installError = '', overrides = {}) {
   const submit = async () => { window.document.querySelector('#s-save').click(); await settle(); };
   return { dom, window, calls, change, submit, settle };
 }
+
+test('default reasoning loads the saved level and persists edits without requiring advanced settings', async () => {
+  const page = await settingsPage(undefined, '', { settings: { default_reasoning_level: 'high' } });
+  try {
+    const select = page.window.document.querySelector('#s-level');
+    assert.equal(select.value, 'high');
+    assert.deepEqual(Array.from(select.options, option => option.value), ['low', 'high', 'max']);
+    assert.equal(select.closest('details'), null);
+    assert.equal(page.window.settingsDirty, false);
+    page.change('s-level', 'max');
+    assert.equal(page.window.settingsDirty, true);
+    assert.equal(JSON.parse(page.window.sessionStorage.getItem('z2a_settings_draft'))['s-level'], 'max');
+    await page.submit();
+    assert.equal(page.calls.find(call => call.method === 'PUT').body.default_reasoning_level, 'max');
+    assert.equal(page.window.settingsDirty, false);
+    assert.equal(page.window.sessionStorage.getItem('z2a_settings_draft'), null);
+  } finally { page.dom.window.close(); }
+});
+
+test('default reasoning restores drafts and preserves the saved level when saving other fields', async () => {
+  const page = await settingsPage({ 's-level': 'high' });
+  try {
+    assert.equal(page.window.document.querySelector('#s-level').value, 'high');
+    await page.submit();
+    assert.equal(page.calls.find(call => call.method === 'PUT').body.default_reasoning_level, 'high');
+  } finally { page.dom.window.close(); }
+  const unchanged = await settingsPage(undefined, '', { settings: { default_reasoning_level: 'max' } });
+  try {
+    unchanged.change('s-poll', '120');
+    await unchanged.submit();
+    assert.equal(unchanged.calls.find(call => call.method === 'PUT').body.default_reasoning_level, 'max');
+  } finally { unchanged.dom.window.close(); }
+});
 
 test('settings form saves proxy switches and captcha controls in their real API fields', async () => {
   const page = await settingsPage();
