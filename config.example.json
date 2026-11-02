@@ -7,9 +7,8 @@
   "default_reasoning_level": "low",
   "outbound_proxy": {
     "enabled": false,
-    "rotation_enabled": false,
-    "rotation_interval_sec": 0,
     "source": "manual",
+    "preferred_node": "",
     "urls": [],
     "subscription_url": "",
     "subscription_filter": "",

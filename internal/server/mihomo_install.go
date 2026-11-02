@@ -58,6 +58,10 @@ func (a *App) resolveMihomo(configured string) (string, error) {
 	resolved, err := exec.LookPath(binary)
 	if err != nil && (configured == "" || configured == "mihomo") {
 		resolved, err = exec.LookPath(a.managedMihomoPath())
+		if err != nil {
+			// Portable deployments may place Mihomo beside config.json.
+			resolved, err = exec.LookPath(filepath.Join(a.root, "mihomo"))
+		}
 	}
 	if err != nil {
 		return "", err
@@ -66,8 +70,12 @@ func (a *App) resolveMihomo(configured string) (string, error) {
 }
 
 func (a *App) mihomoStatus() M {
+	return a.mihomoStatusForPath(str(obj(a.config()["outbound_proxy"])["mihomo_path"]))
+}
+
+func (a *App) mihomoStatusForPath(configured string) M {
 	_, supported := mihomoAssets[runtime.GOOS+"/"+runtime.GOARCH]
-	binary, err := a.resolveMihomo(str(obj(a.config()["outbound_proxy"])["mihomo_path"]))
+	binary, err := a.resolveMihomo(configured)
 	return M{"installed": err == nil, "path": binary, "managed": binary == a.managedMihomoPath(), "version": mihomoVersion, "platform": runtime.GOOS + "/" + runtime.GOARCH, "supported": supported}
 }
 

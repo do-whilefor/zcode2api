@@ -16,7 +16,7 @@ import (
 )
 
 func proxyDefaults() M {
-	return M{"enabled": false, "rotation_enabled": false, "rotation_interval_sec": 0, "source": "manual", "urls": []any{}, "subscription_url": "", "subscription_filter": "", "mihomo_path": "mihomo", "refresh_interval_sec": 3600}
+	return M{"enabled": false, "rotation_enabled": false, "rotation_interval_sec": 0, "source": "manual", "urls": []any{}, "subscription_url": "", "subscription_filter": "", "preferred_node": "", "mihomo_path": "mihomo", "refresh_interval_sec": 3600}
 }
 
 func validateOutboundProxyFields(value any) error {
@@ -64,6 +64,11 @@ func validateOutboundProxyFields(value any) error {
 			if _, err := regexp.Compile(pattern); err != nil {
 				return fmt.Errorf("节点筛选须为有效的正则表达式")
 			}
+		case "preferred_node":
+			identity, ok := value.(string)
+			if !ok || identity != "" && !regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(identity) {
+				return fmt.Errorf("指定代理节点标识无效，请重新选择")
+			}
 		case "mihomo_path":
 			path, ok := value.(string)
 			if !ok || strings.TrimSpace(path) == "" || strings.ContainsAny(path, "\r\n\x00") {
@@ -108,7 +113,27 @@ func validateOutboundProxy(value any) error {
 
 type proxyContextKey struct{}
 type proxyRoute struct{ URL string }
-type proxyEndpoint struct{ URL, Name string }
+type proxyEndpoint struct{ URL, Name, ID string }
+
+func (endpoint proxyEndpoint) identity() string {
+	if endpoint.ID != "" {
+		return endpoint.ID
+	}
+	return endpoint.URL
+}
+
+func (endpoint proxyEndpoint) selectionID() string {
+	if endpoint.ID != "" {
+		return endpoint.ID
+	}
+	return hash(endpoint.URL)
+}
+
+type proxySelectionKey struct{}
+type proxySelection struct {
+	generation uint64
+	identity   string
+}
 
 func selectedProxy(ctx context.Context) string {
 	if route, ok := ctx.Value(proxyContextKey{}).(proxyRoute); ok {
@@ -119,13 +144,14 @@ func selectedProxy(ctx context.Context) string {
 
 type outboundProxyManager struct {
 	mu          sync.Mutex
-	sequence    uint64
-	rotatedAt   time.Time
+	generation  uint64
+	selected    string
+	endpoints   []proxyEndpoint
 	key         string
 	current     *managedProxyRuntime
 	runtimes    map[*managedProxyRuntime]bool
 	closing     bool
-	unavailable map[string]time.Time
+	unavailable map[string]bool
 }
 
 func asProxyFailure(err error) *Failure {
@@ -181,12 +207,12 @@ func (a *App) pinOutboundProxy(parent context.Context, account M) (context.Conte
 		for _, value := range arr(options["urls"]) {
 			address := str(value)
 			if !seen[address] {
-				endpoints = append(endpoints, proxyEndpoint{address, maskedProxy(address)})
+				endpoints = append(endpoints, proxyEndpoint{URL: address, Name: maskedProxy(address)})
 				seen[address] = true
 			}
 		}
 	}
-	index := a.proxies.selectEndpoint(options, endpoints, time.Now())
+	index, generation := a.proxies.selectEndpoint(options, endpoints)
 	var once sync.Once
 	release := func() {
 		once.Do(func() {
@@ -196,61 +222,67 @@ func (a *App) pinOutboundProxy(parent context.Context, account M) (context.Conte
 			cleanup()
 		})
 	}
+	if index < 0 {
+		release()
+		return parent, func() {}, proxyFailure("proxy_pool_exhausted", "无可用代理节点，请检查代理配置")
+	}
+	ctx = context.WithValue(ctx, proxySelectionKey{}, proxySelection{generation, endpoints[index].identity()})
 	return context.WithValue(ctx, proxyContextKey{}, proxyRoute{endpoints[index].URL}), release, nil
 }
 
-func (manager *outboundProxyManager) selectEndpoint(options M, endpoints []proxyEndpoint, now time.Time) int {
+func (manager *outboundProxyManager) selectEndpoint(options M, endpoints []proxyEndpoint) (int, uint64) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 	key := hash(js(options))
 	if key != manager.key {
-		manager.key, manager.sequence, manager.rotatedAt = key, 0, time.Time{}
-	}
-	if !truth(options["rotation_enabled"]) {
-		return 0
-	}
-	interval := time.Duration(num(options["rotation_interval_sec"])) * time.Second
-	if manager.rotatedAt.IsZero() {
-		manager.rotatedAt = now
-	} else if interval > 0 && now.Sub(manager.rotatedAt) >= interval {
-		manager.sequence++
-		manager.rotatedAt = now
-	}
-	for address, until := range manager.unavailable {
-		if !now.Before(until) {
-			delete(manager.unavailable, address)
+		manager.key, manager.selected = key, ""
+		manager.generation++
+		manager.unavailable = map[string]bool{}
+		for _, endpoint := range endpoints {
+			if endpoint.selectionID() == str(options["preferred_node"]) {
+				manager.selected = endpoint.identity()
+				break
+			}
 		}
 	}
-	index := int(manager.sequence % uint64(len(endpoints)))
-	healthy := false
-	for offset := 0; offset < len(endpoints); offset++ {
-		candidate := (index + offset) % len(endpoints)
-		if _, cooling := manager.unavailable[endpoints[candidate].URL]; !cooling {
-			index, healthy = candidate, true
-			manager.sequence += uint64(offset)
-			if offset > 0 {
-				manager.rotatedAt = now
-			}
+	manager.endpoints = append([]proxyEndpoint(nil), endpoints...)
+	start := 0
+	for index, endpoint := range endpoints {
+		if endpoint.identity() == manager.selected {
+			start = index
 			break
 		}
 	}
-	if interval == 0 || !healthy {
-		manager.sequence++
+	for offset := 0; offset < len(endpoints); offset++ {
+		index := (start + offset) % len(endpoints)
+		identity := endpoints[index].identity()
+		if !manager.unavailable[identity] {
+			manager.selected = identity
+			return index, manager.generation
+		}
 	}
-	return index
+	return -1, manager.generation
 }
 
-func (a *App) markProxyNetworkFailure(ctx context.Context) {
-	address := selectedProxy(ctx)
-	if address == "" || ctx.Err() != nil {
-		return
+// Only a production pool selection may retire a node. Account overrides, draft
+// probes, canceled requests and results from an old configuration cannot alter it.
+func (a *App) markProxyFailure(ctx context.Context) bool {
+	selection, ok := ctx.Value(proxySelectionKey{}).(proxySelection)
+	if !ok || ctx.Err() != nil {
+		return false
 	}
 	a.proxies.mu.Lock()
-	if a.proxies.unavailable == nil {
-		a.proxies.unavailable = map[string]time.Time{}
+	defer a.proxies.mu.Unlock()
+	if selection.generation != a.proxies.generation {
+		return false
 	}
-	a.proxies.unavailable[address] = time.Now().Add(30 * time.Second)
-	a.proxies.mu.Unlock()
+	a.proxies.unavailable[selection.identity] = true
+	for _, endpoint := range a.proxies.endpoints {
+		if !a.proxies.unavailable[endpoint.identity()] {
+			return true
+		}
+	}
+	return false
 }
 
 func maskedProxy(address string) string {
@@ -286,8 +318,9 @@ func (a *App) resetOutboundProxies() {
 	a.proxies.mu.Lock()
 	old := a.proxies.current
 	a.proxies.current = nil
-	a.proxies.key, a.proxies.sequence = "", 0
-	a.proxies.rotatedAt = time.Time{}
+	a.proxies.key, a.proxies.selected = "", ""
+	a.proxies.generation++
+	a.proxies.endpoints = nil
 	a.proxies.unavailable = nil
 	stop := old != nil && old.references == 0
 	if old != nil {
@@ -323,7 +356,7 @@ func (a *App) testOutboundProxies(parent context.Context, options M) (M, error) 
 	defer cancel()
 	stop := context.AfterFunc(a.ctx, cancel)
 	defer stop()
-	endpoints := []proxyEndpoint{{"", "直连"}}
+	endpoints := []proxyEndpoint{{URL: "", Name: "直连"}}
 	if truth(options["enabled"]) {
 		endpoints = nil
 		if options["source"] == "subscription" {
@@ -335,7 +368,7 @@ func (a *App) testOutboundProxies(parent context.Context, options M) (M, error) 
 			endpoints = runtime.endpoints
 		} else {
 			for _, value := range arr(options["urls"]) {
-				endpoints = append(endpoints, proxyEndpoint{str(value), maskedProxy(str(value))})
+				endpoints = append(endpoints, proxyEndpoint{URL: str(value), Name: maskedProxy(str(value))})
 			}
 		}
 	}

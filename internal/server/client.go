@@ -170,6 +170,7 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 	}
 	res, e := c.Do(req)
 	if e != nil {
+		a.markProxyFailure(ctx)
 		return apiResult{}, e
 	}
 	defer res.Body.Close()
@@ -178,6 +179,7 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 	}
 	b, e := io.ReadAll(io.LimitReader(res.Body, (32<<20)+1))
 	if e != nil {
+		a.markProxyFailure(ctx)
 		return apiResult{}, e
 	}
 	if len(b) > 32<<20 {
@@ -187,11 +189,17 @@ func (a *App) api(ctx context.Context, account M, method, path, token string, bo
 	result := apiResult{Status: res.StatusCode, JSON: j, Header: res.Header, OK: res.StatusCode == 200 && (codeIs(j["code"], 0) || codeIs(j["code"], 200))}
 	if !result.OK {
 		result.errorBody = append([]byte(nil), b[:min(len(b), 64<<10)]...)
+		failure := classify(upstreamHTTPFailure(res, result.errorBody))
+		if failure.Kind == "risk" || res.StatusCode == http.StatusProxyAuthRequired {
+			a.markProxyFailure(ctx)
+		}
 	}
 	return result, nil
 }
 func apiFailure(r apiResult, label string) error {
-	return &Failure{Status: r.Status, Code: str(first(r.JSON["code"], r.Status)), Message: label + ": " + str(first(r.JSON["msg"], r.JSON["message"], r.Status))}
+	failure := providerFailure(r.JSON, r.Status, r.Header.Get("Retry-After"))
+	failure.Message = label + ": " + conciseFailureMessage(failure)
+	return failure
 }
 func (a *App) customer(ctx context.Context, account M, token string) (apiResult, error) {
 	host := "https://bigmodel.cn"

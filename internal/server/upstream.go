@@ -144,6 +144,9 @@ func providerFailure(v M, status int, retry string) *Failure {
 }
 
 func upstreamHTTPFailure(res *http.Response, body []byte) *Failure {
+	if res.StatusCode == http.StatusProxyAuthRequired {
+		return &Failure{Status: res.StatusCode, Kind: "network", Code: "proxy_auth_failed", Message: "代理鉴权失败", Retryable: true}
+	}
 	v := obj(parse(string(body), nil))
 	f := providerFailure(v, res.StatusCode, res.Header.Get("Retry-After"))
 	if len(v) > 0 {
@@ -151,28 +154,15 @@ func upstreamHTTPFailure(res *http.Response, body []byte) *Failure {
 	}
 	page := strings.ToLower(string(body))
 	switch {
+	case riskBlockMessage(page):
+		f.Kind, f.Code, f.Message = "risk", "upstream_risk_blocked", "上游风控拦截"
 	case (res.StatusCode == 403 || res.StatusCode == 405) && strings.Contains(page, "errors.aliyun.com/") && strings.Contains(page, "block_message"):
 		f.Kind, f.Code = "risk", "upstream_waf_blocked"
-		f.Message += "：请求被阿里云 ESA/WAF 拦截，请检查服务器出口或联系上游处理"
+		f.Message = "上游安全网关拦截"
 	case strings.TrimSpace(string(body)) == "":
 		f.Message += "：上游返回空响应体"
 	default:
 		f.Message += "：上游返回非 JSON 错误响应"
-	}
-	// Keep only bounded diagnostic headers; never log cookies or the raw block page.
-	details := []string{}
-	for _, key := range []string{"Content-Type", "Server", "Allow", "X-Request-Id", "EagleId"} {
-		value := []rune(strings.Join(strings.Fields(res.Header.Get(key)), " "))
-		if len(value) == 0 {
-			continue
-		}
-		if len(value) > 192 {
-			value = append(value[:192], []rune("…")...)
-		}
-		details = append(details, key+"="+string(value))
-	}
-	if len(details) > 0 {
-		f.Message += "（" + strings.Join(details, "; ") + "）"
 	}
 	return f
 }
@@ -226,6 +216,7 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 		if failure == nil {
 			return
 		}
+		defer func() { failure.Message = conciseFailureMessage(failure) }()
 		failure.Committed = committed
 		if parent.Err() != nil {
 			failure.Kind, failure.Code, failure.Message = "canceled", "canceled", "客户端已断开"
@@ -247,8 +238,15 @@ func (a *App) inferHTTP(parent context.Context, account M, o inferOptions) (resu
 	}
 	defer release()
 	defer func() {
-		if failure != nil && failure.Kind == "network" && failure.Retryable {
-			a.markProxyNetworkFailure(ctx)
+		if failure == nil || ctx.Err() != nil {
+			return
+		}
+		classify(failure)
+		if failure.Kind == "risk" && failure.Code != "captcha_duplicate_result" || failure.Kind == "network" && failure.Retryable {
+			if _, pooled := ctx.Value(proxySelectionKey{}).(proxySelection); pooled {
+				failure.Retryable = a.markProxyFailure(ctx)
+				failure.ProxyFailover = failure.Retryable
+			}
 		}
 	}()
 	client, e := a.client(ctx)

@@ -105,6 +105,12 @@ type subscriptionNode struct {
 	config M
 }
 
+func (node subscriptionNode) identity() string {
+	config := clone(node.config)
+	delete(config, "name")
+	return hash(js(config))
+}
+
 func decodeSubscription(body []byte, filter string) ([]subscriptionNode, error) {
 	text := strings.TrimSpace(strings.TrimPrefix(string(body), "\ufeff"))
 	if !strings.Contains(text, "://") {
@@ -236,11 +242,7 @@ func decodeSubscription(body []byte, filter string) ([]subscriptionNode, error) 
 	return nodes, nil
 }
 
-func (a *App) startManagedProxy(ctx context.Context, options M) (*managedProxyRuntime, error) {
-	binary, err := a.resolveMihomo(str(options["mihomo_path"]))
-	if err != nil {
-		return nil, proxyFailure("proxy_runtime_missing", "未找到 Mihomo；可在设置中点击安装，或填写已有可执行文件路径")
-	}
+func (a *App) subscriptionNodes(ctx context.Context, options M) ([]subscriptionNode, error) {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.Proxy = nil // Subscription bootstrap never recursively uses this pool.
 	defer transport.CloseIdleConnections()
@@ -263,7 +265,15 @@ func (a *App) startManagedProxy(ctx context.Context, options M) (*managedProxyRu
 	if response.StatusCode != 200 || readErr != nil || len(body) > 2<<20 {
 		return nil, proxyFailure("proxy_subscription_unavailable", "订阅响应无效或超过 2 MB")
 	}
-	nodes, err := decodeSubscription(body, str(options["subscription_filter"]))
+	return decodeSubscription(body, str(options["subscription_filter"]))
+}
+
+func (a *App) startManagedProxy(ctx context.Context, options M) (*managedProxyRuntime, error) {
+	binary, err := a.resolveMihomo(str(options["mihomo_path"]))
+	if err != nil {
+		return nil, proxyFailure("proxy_runtime_missing", "未找到 Mihomo；可在设置中点击安装，或填写已有可执行文件路径")
+	}
+	nodes, err := a.subscriptionNodes(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +308,8 @@ func (a *App) startManagedProxy(ctx context.Context, options M) (*managedProxyRu
 		// Each listener has one fixed outbound. A global load-balance listener
 		// would let the SDK and Go's separate CONNECTs pick different exits.
 		listeners = append(listeners, M{"name": fmt.Sprintf("in-%d", i), "type": "http", "listen": "127.0.0.1", "port": address.Port, "proxy": node.config["name"]})
-		endpoints = append(endpoints, proxyEndpoint{fmt.Sprintf("http://127.0.0.1:%d", address.Port), node.name})
+		// Local ports change on refresh; node identity must survive that change.
+		endpoints = append(endpoints, proxyEndpoint{URL: fmt.Sprintf("http://127.0.0.1:%d", address.Port), Name: node.name, ID: node.identity()})
 	}
 	config := M{"allow-lan": false, "mode": "rule", "log-level": "silent", "ipv6": false, "listeners": listeners, "proxies": proxies, "rules": []any{"MATCH,REJECT"}}
 	filename := filepath.Join(directory, "config.json")

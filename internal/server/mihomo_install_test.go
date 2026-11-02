@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -110,6 +111,42 @@ func TestMihomoInstallRequiresAuthenticationAndStatusDoesNotInstall(t *testing.T
 	}
 	if _, err := os.Stat(filepath.Join(a.data, "tools")); !os.IsNotExist(err) {
 		t.Fatal("reading status unexpectedly installed software")
+	}
+}
+
+func TestMihomoAutoDetectionAndDraftPathStatus(t *testing.T) {
+	a := networkTestApp(t)
+	pathDir := t.TempDir()
+	t.Setenv("PATH", pathDir)
+	name := "mihomo"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	equal(t, a.mihomoStatus()["installed"], false)
+	portable := filepath.Join(a.root, name)
+	must(t, os.WriteFile(portable, []byte("existence check must not execute this file"), 0700))
+	equal(t, a.mihomoStatus()["path"], portable)
+	managed := a.managedMihomoPath()
+	must(t, os.MkdirAll(filepath.Dir(managed), 0700))
+	must(t, os.WriteFile(managed, []byte("managed fixture"), 0700))
+	equal(t, a.mihomoStatus()["path"], managed)
+	fromPath := filepath.Join(pathDir, name)
+	must(t, os.WriteFile(fromPath, []byte("PATH fixture"), 0700))
+	equal(t, a.mihomoStatus()["path"], fromPath)
+	custom := filepath.Join(a.root, "custom directory", name)
+	must(t, os.MkdirAll(filepath.Dir(custom), 0700))
+	must(t, os.WriteFile(custom, []byte("custom fixture"), 0700))
+	value, status, err := a.adminRoute(httptest.NewRequest("GET", "/api/settings/proxy/mihomo?path="+url.QueryEscape(custom), nil), nil)
+	must(t, err)
+	equal(t, status, 200)
+	equal(t, obj(value)["installed"], true)
+	equal(t, obj(value)["path"], custom)
+	equal(t, obj(a.config()["outbound_proxy"])["mihomo_path"], "mihomo")
+	equal(t, a.mihomoStatusForPath(filepath.Join(a.root, "missing", name))["installed"], false)
+	for _, invalid := range []string{"", "bad\npath", strings.Repeat("x", 4097)} {
+		_, status, err = a.adminRoute(httptest.NewRequest("GET", "/api/settings/proxy/mihomo?path="+url.QueryEscape(invalid), nil), nil)
+		must(t, err)
+		equal(t, status, 400)
 	}
 }
 

@@ -39,7 +39,7 @@ func setTestProxy(a *App, options M) {
 	a.resetOutboundProxies()
 }
 
-func TestProxyRotationIsConcurrentAndPinned(t *testing.T) {
+func TestProxySelectionIsConcurrentAndPinned(t *testing.T) {
 	a := networkTestApp(t)
 	addresses := []any{"http://127.0.0.1:18001", "http://127.0.0.1:18002", "http://127.0.0.1:18003"}
 	setTestProxy(a, M{"enabled": true, "rotation_enabled": true, "urls": addresses})
@@ -65,10 +65,8 @@ func TestProxyRotationIsConcurrentAndPinned(t *testing.T) {
 		})
 	}
 	group.Wait()
-	for _, value := range addresses {
-		if counts[str(value)] != 30 {
-			t.Fatalf("unbalanced rotation: %v", counts)
-		}
+	if counts[str(addresses[0])] != ninetyRequests || len(counts) != 1 {
+		t.Fatalf("successful operations must stay on one exit: %v", counts)
 	}
 	setTestProxy(a, M{"enabled": true, "rotation_enabled": false, "urls": addresses})
 	for range 5 {
@@ -139,7 +137,7 @@ func TestProxyConfigurationPersistenceAndDraftProbe(t *testing.T) {
 	if status != 200 || !truth(obj(arr(result["results"])[0])["reachable"]) || probes.Load() != 1 {
 		t.Fatalf("draft proxy probe failed: %d %v", status, result)
 	}
-	if truth(obj(a.config()["outbound_proxy"])["enabled"]) || a.proxies.sequence != 0 {
+	if truth(obj(a.config()["outbound_proxy"])["enabled"]) || a.proxies.selected != "" {
 		t.Fatal("testing a draft must not save or advance production rotation")
 	}
 	status, result = call("PUT", "/api/settings", M{"outbound_proxy": options, "http": M{"captcha": M{"mode": "auto", "simulate_canvas_webgl": false}}}, token)
@@ -150,6 +148,7 @@ func TestProxyConfigurationPersistenceAndDraftProbe(t *testing.T) {
 	if err != nil || selectedProxy(pinned) != proxy.URL {
 		t.Fatal("first proxy selection failed")
 	}
+	a.markProxyFailure(pinned)
 	end()
 	status, result = call("PUT", "/api/settings", M{"outbound_proxy": options, "poll_interval_sec": 120}, token)
 	if status != 200 {
@@ -230,8 +229,8 @@ func TestProxyPinsSDKSceneAndExpiredTicketRetry(t *testing.T) {
 			t.Fatalf("inference failed: %+v", failure)
 		}
 	}
-	if firstMessages.Load() != 2 || secondMessages.Load() != 1 || firstConfigs.Load() != 2 || issued.Load() != 3 || a.proxies.sequence != 2 {
-		t.Fatalf("scene/SDK/retry rotated incorrectly: messages %d/%d configs %d tickets %d selection %d", firstMessages.Load(), secondMessages.Load(), firstConfigs.Load(), issued.Load(), a.proxies.sequence)
+	if firstMessages.Load() != 3 || secondMessages.Load() != 0 || firstConfigs.Load() != 2 || issued.Load() != 3 {
+		t.Fatalf("scene/SDK/retry changed the sticky exit: messages %d/%d configs %d tickets %d", firstMessages.Load(), secondMessages.Load(), firstConfigs.Load(), issued.Load())
 	}
 }
 
@@ -262,7 +261,7 @@ func TestManagedProxyLeaseAndRefreshFallback(t *testing.T) {
 	options := merge(proxyDefaults(), M{"enabled": true, "source": "subscription", "subscription_url": "https://example.invalid/sub?secret=test", "mihomo_path": "missing-test-mihomo"})
 	setTestProxy(a, options)
 	var stopped atomic.Int32
-	runtime := &managedProxyRuntime{key: hash(js(options)), endpoints: []proxyEndpoint{{"http://127.0.0.1:18001", "test"}}, expires: time.Now().Add(-time.Minute), done: make(chan struct{})}
+	runtime := &managedProxyRuntime{key: hash(js(options)), endpoints: []proxyEndpoint{{URL: "http://127.0.0.1:18001", Name: "test"}}, expires: time.Now().Add(-time.Minute), done: make(chan struct{})}
 	runtime.stopFn = func() { stopped.Add(1); close(runtime.done) }
 	a.proxies.current = runtime
 	a.proxies.runtimes = map[*managedProxyRuntime]bool{runtime: true}
@@ -299,9 +298,10 @@ func TestConfigTransportFailuresRetryButRiskRefusalsStop(t *testing.T) {
 		body             string
 		retry, cooling   bool
 	}{
-		{"transport EOF", "network", "captcha_config_unavailable", 0, "", true, true},
-		{"WAF HTML", "risk", "upstream_waf_blocked", 405, `<html>errors.aliyun.com/ block_message</html>`, false, false},
-		{"business refusal", "risk", "3012", 405, `{"error":{"code":"3012","message":"blocked"}}`, false, false},
+		{"transport EOF", "network", "captcha_config_unavailable", 0, "", false, true},
+		{"WAF HTML", "risk", "upstream_waf_blocked", 405, `<html>errors.aliyun.com/ block_message</html>`, false, true},
+		{"business refusal", "risk", "3012", 405, `{"error":{"code":"3012","message":"blocked"}}`, false, true},
+		{"proxy auth failure", "network", "proxy_auth_failed", 407, "proxy authentication required", false, true},
 		{"temporary origin failure", "server", "captcha_config_unavailable", 503, `{"message":"unavailable"}`, true, false},
 	} {
 		t.Run(item.name, func(t *testing.T) {
@@ -335,7 +335,7 @@ func TestConfigTransportFailuresRetryButRiskRefusalsStop(t *testing.T) {
 	}
 }
 
-func TestRotationSkipsNetworkFailuresWithoutChangingFixedMode(t *testing.T) {
+func TestProxyFailoverRemovesFailuresAndSticksToNextNode(t *testing.T) {
 	a := networkTestApp(t)
 	addresses := []any{"http://127.0.0.1:18001", "http://127.0.0.1:18002", "http://127.0.0.1:18003"}
 	setTestProxy(a, M{"enabled": true, "rotation_enabled": true, "urls": addresses})
@@ -343,7 +343,7 @@ func TestRotationSkipsNetworkFailuresWithoutChangingFixedMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a.markProxyNetworkFailure(ctx)
+	a.markProxyFailure(ctx)
 	release()
 	counts := map[string]int{}
 	for range 8 {
@@ -354,15 +354,22 @@ func TestRotationSkipsNetworkFailuresWithoutChangingFixedMode(t *testing.T) {
 		counts[selectedProxy(ctx)]++
 		done()
 	}
-	if counts[str(addresses[0])] != 0 || counts[str(addresses[1])] != 4 || counts[str(addresses[2])] != 4 {
+	if counts[str(addresses[0])] != 0 || counts[str(addresses[1])] != 8 || counts[str(addresses[2])] != 0 {
 		t.Fatalf("unhealthy exit was not skipped: %v", counts)
 	}
-	a.configMu.Lock()
-	obj(a.cfg["outbound_proxy"])["rotation_enabled"] = false
-	a.configMu.Unlock()
 	ctx, release, err = a.pinOutboundProxy(context.Background(), M{})
-	if err != nil || selectedProxy(ctx) != str(addresses[0]) {
-		t.Fatal("fixed mode must not silently choose another proxy")
+	if err != nil || selectedProxy(ctx) != str(addresses[1]) || !a.markProxyFailure(ctx) {
+		t.Fatal("second failed node must advance to the third")
 	}
 	release()
+	ctx, release, err = a.pinOutboundProxy(context.Background(), M{})
+	if err != nil || selectedProxy(ctx) != str(addresses[2]) || a.markProxyFailure(ctx) {
+		t.Fatal("last failed node must exhaust the pool")
+	}
+	release()
+	_, release, err = a.pinOutboundProxy(context.Background(), M{})
+	release()
+	if err == nil || asProxyFailure(err).Code != "proxy_pool_exhausted" {
+		t.Fatal("exhausted pool must fail without reusing failed nodes or going direct")
+	}
 }

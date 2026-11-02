@@ -157,6 +157,9 @@ func (a *App) adminRoute(r *http.Request, b M) (any, int, error) {
 		for _, v := range rows {
 			m := obj(v)
 			m["timings"] = parse(m["timings"], nil)
+			if str(m["error_message"]) != "" {
+				m["error_message"] = conciseFailureMessage(&Failure{Code: str(m["error_code"]), Message: str(m["error_message"])})
+			}
 		}
 		return rows, 200, nil
 	case "GET /api/performance":
@@ -205,8 +208,37 @@ func (a *App) adminRoute(r *http.Request, b M) (any, int, error) {
 		delete(over, "notify_webhook")
 		out["overrides"] = over
 		return out, 200, nil
+	case "GET /api/settings/captcha/runtime":
+		options := obj(obj(cfg["http"])["captcha"])
+		for _, key := range []string{"node_path", "jsdom_path"} {
+			if r.URL.Query().Has(key) {
+				value := r.URL.Query().Get(key)
+				if len(value) > 4096 || validateCaptchaOptions(M{key: value}) != nil {
+					return M{"ok": false, "error": "Node.js 或 jsdom 路径无效"}, 400, nil
+				}
+				options[key] = value
+			}
+		}
+		return a.captchaRuntimeStatus(ctx, options), 200, nil
 	case "GET /api/settings/proxy/mihomo":
+		if r.URL.Query().Has("path") {
+			path := r.URL.Query().Get("path")
+			if len(path) > 4096 || validateOutboundProxyFields(M{"mihomo_path": path}) != nil {
+				return M{"ok": false, "error": "Mihomo 可执行文件路径无效"}, 400, nil
+			}
+			return a.mihomoStatusForPath(path), 200, nil
+		}
 		return a.mihomoStatus(), 200, nil
+	case "POST /api/settings/proxy/nodes":
+		if e := validateOutboundProxyFields(b["outbound_proxy"]); e != nil {
+			return M{"ok": false, "error": e.Error()}, 400, nil
+		}
+		options := merge(obj(cfg["outbound_proxy"]), obj(b["outbound_proxy"]))
+		result, e := a.outboundProxyNodes(ctx, options)
+		if e != nil {
+			return M{"ok": false, "error": asProxyFailure(e).Message}, 400, nil
+		}
+		return result, 200, nil
 	case "POST /api/settings/proxy/mihomo/install":
 		result, err := a.installMihomo(ctx)
 		if err != nil {

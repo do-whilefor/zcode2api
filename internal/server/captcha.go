@@ -85,13 +85,7 @@ func (a *App) captchaHeaders(parent context.Context, account M) (http.Header, *F
 	if !truth(scene["enabled"]) || (mode == "auto" && truth(scene["skip_model_request"])) {
 		return headers, nil
 	}
-	modulePath := str(options["jsdom_path"])
-	if modulePath == "" {
-		modulePath = "captcha_node"
-	}
-	if !filepath.IsAbs(modulePath) {
-		modulePath = filepath.Join(a.root, modulePath)
-	}
+	modulePath := a.captchaModulePath(str(options["jsdom_path"]))
 	parameters := M{"origin": a.origin, "scene_id": scene["sceneId"], "region": scene["region"], "prefix": scene["prefix"], "simulate_canvas_webgl": first(options["simulate_canvas_webgl"], true), "module_path": modulePath, "timeout_ms": options["timeout_ms"], "proxy_url": selectedProxy(ctx)}
 	run := a.captcha.run
 	if run == nil {
@@ -162,11 +156,14 @@ func (a *App) captchaScene(ctx context.Context, account M) (M, *Failure) {
 		if errors.As(err, &failure) {
 			return nil, failure
 		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, &Failure{Kind: "timeout", Code: "timeout", Message: "读取安全验证配置超时", Retryable: true}
+		}
 		return nil, &Failure{Kind: "network", Code: "captcha_config_unavailable", Message: "读取上游安全验证配置的网络请求失败", Retryable: true}
 	}
 	if !response.OK {
 		failure := classify(upstreamHTTPFailure(&http.Response{StatusCode: response.Status, Header: response.Header}, response.errorBody))
-		if failure.Kind == "risk" {
+		if failure.Kind == "risk" || failure.Code == "proxy_auth_failed" {
 			return nil, failure
 		}
 		return nil, &Failure{Kind: "server", Code: "captcha_config_unavailable", Message: fmt.Sprintf("读取上游安全验证配置失败（HTTP %d）", response.Status), Retryable: response.Status >= 500}
@@ -212,9 +209,9 @@ func (a *App) runCaptcha(ctx context.Context, options, parameters M) (M, error) 
 	if err := os.WriteFile(helper, captchaRuntime, 0600); err != nil {
 		return nil, err
 	}
-	node := str(fallback(options["node_path"], "node"))
-	if !filepath.IsAbs(node) && strings.ContainsAny(node, "/\\") {
-		node = filepath.Join(a.root, node)
+	node, err := a.resolveCaptchaNode(str(options["node_path"]))
+	if err != nil {
+		return nil, err
 	}
 	command := exec.CommandContext(ctx, node, helper)
 	hideChildWindow(command)
@@ -230,7 +227,7 @@ func (a *App) runCaptcha(ctx context.Context, options, parameters M) (M, error) 
 		}
 		return command.Process.Kill()
 	}
-	err := command.Run()
+	err = command.Run()
 	result := obj(parse(string(output.value), nil))
 	if err != nil && truth(result["ok"]) {
 		return nil, err

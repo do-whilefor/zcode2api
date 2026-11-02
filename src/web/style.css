@@ -823,19 +823,59 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
 .network-settings-fields .inline-notice { margin: 0; }
 .settings-panel .inline-notice { padding: 6px 10px; line-height: 1.5; }
 .settings-panel .code-input { padding: 8px; }
-.network-advanced > summary { cursor: pointer; font-size: 13px; }
-.network-advanced > .network-settings-fields { padding-top: 8px; }
+.settings-subsection { border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.settings-subsection h3 { margin: 0; font-size: 13px; font-weight: 500; }
 .proxy-test-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .proxy-test-actions small { color: var(--muted-fg); }
-.mihomo-install { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; }
-.mihomo-install > small { color: var(--muted-fg); line-height: 1.6; }
+.settings-section.formcard { display: block; padding: 0; background: var(--card); }
+.settings-section-summary { display: flex; align-items: center; gap: 12px; padding: 12px 18px; cursor: pointer; list-style: none; }
+.settings-section-summary::-webkit-details-marker { display: none; }
+.settings-section-summary::before { content: '›'; font-size: 20px; color: var(--muted-fg); transition: transform 150ms; }
+.settings-section[open] > summary::before { transform: rotate(90deg); }
+.settings-section-summary > span:first-of-type { flex: 1; min-width: 0; }
+.settings-section-summary strong { display: block; font-size: 16px; font-weight: 600; }
+.settings-section-summary small { display: block; color: var(--muted-fg); font-size: 12px; }
+.settings-section-summary .pill { pointer-events: none; }
+.settings-section[open] > summary { border-bottom: 1px solid var(--border); }
+.settings-section-body { border-radius: 0 0 var(--r-card) var(--r-card); }
+.settings-panel.settings-section-content { display: block; }
+.proxy-small-button.btn { height: 24px; padding: 0 9px; font-size: 11px; flex: none; }
+.mihomo-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 13px; }
+.mihomo-field-heading, .proxy-field-heading { display: flex; align-items: center; gap: 8px; min-height: 24px; line-height: 1.5; }
+.mihomo-field-heading { justify-content: space-between; }
+.mihomo-field-actions { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.mihomo-field-actions .text-action { height: 24px; padding: 0 6px; font-size: 11px; white-space: nowrap; }
+.mihomo-field input { height: 32px; min-width: 0; background: var(--background); border: 1px solid var(--input); }
+.mihomo-field small { color: var(--muted-fg); font-size: 12px; overflow-wrap: anywhere; }
+.settings-panel .runtime-status.ok-text { color: var(--ok); }
+.settings-panel .runtime-status.warn-text { color: var(--warn); }
+.proxy-node-box { border: 1px solid var(--border); border-radius: 10px; min-width: 0; gap: 0; }
+.proxy-node-heading { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+.proxy-node-heading h3 { margin: 0; font-size: 13px; font-weight: 500; }
+.proxy-node-heading > span { margin-left: auto; color: var(--muted-fg); font-size: 12px; }
+.proxy-node-content { display: grid; gap: 10px; padding: 0 12px 12px; }
+.proxy-node-content .proxy-test-actions { justify-content: space-between; }
+.proxy-node-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
+.proxy-node-option { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; min-width: 0; }
+.proxy-node-option:first-child { grid-column: 1 / -1; }
+.proxy-node-option:has(input:checked) { border-color: var(--foreground); background: var(--muted); }
+.proxy-node-option input { margin: 0; width: 15px; height: 15px; accent-color: var(--primary); }
+.proxy-node-option strong, .proxy-node-option small { display: block; overflow-wrap: anywhere; }
+.proxy-node-option strong { font-size: 12px; font-weight: 500; }
+.proxy-node-option small { font-size: 11px; color: var(--muted-fg); }
+.proxy-node-option.unavailable { opacity: .6; cursor: default; }
+.proxy-node-badge { font-size: 10px; white-space: nowrap; color: var(--muted-fg); }
+.proxy-node-badge.current { color: var(--ok); }
 .proxy-test-results { border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-size: 12px; overflow-wrap: anywhere; }
 .proxy-test-results p { margin: 0 0 8px; color: var(--muted-fg); }
+.proxy-test-details > summary { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; cursor: pointer; list-style: none; }
+.proxy-test-details > summary::-webkit-details-marker { display: none; }
+.proxy-test-details > summary::before { content: '›'; font-size: 18px; color: var(--muted-fg); transition: transform 150ms; }
+.proxy-test-details[open] > summary::before { transform: rotate(90deg); }
+.proxy-test-details > summary > span { color: var(--muted-fg); }
+.proxy-test-body { max-height: 320px; overflow-y: auto; scrollbar-width: thin; margin-top: 10px; padding-right: 8px; }
 .proxy-test-results ul { display: grid; gap: 10px; margin: 0; padding-left: 18px; }
 .proxy-test-results li > span { display: block; margin-top: 3px; }
-.settings-panel .adv-box { min-width: 0; border-top: 0; padding-top: 0; }
-.settings-panel .adv-box:not([open]) { gap: 0; }
-.settings-panel .adv-box > summary { font-size: 13px; color: var(--foreground); line-height: 1.6; }
 .advanced-fields { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
 .advanced-fields > label:not(:first-child) { margin-top: 4px; }
 .advanced-fields > label:first-child { max-width: 360px; }
@@ -939,6 +979,9 @@ html.dark .select-option[aria-selected="true"] { font-weight: 500; }
   .settings-fields { grid-template-columns: 1fr; gap: 10px; }
   .network-settings-fields .settings-fields { grid-template-columns: 1fr; }
   .settings-panel label.f input, .settings-panel .select-trigger { height: 40px; }
+  .mihomo-field input { height: 40px; }
+  .settings-section-summary { padding: 12px 14px; }
+  .proxy-node-list { grid-template-columns: 1fr; }
   .settings-save { min-height: 40px; }
   .account-filters button, #claims-filters button { white-space: nowrap; }
   #claims-filters { flex-wrap: wrap; border-radius: 12px; }

@@ -38,7 +38,7 @@ func classify(f *Failure) *Failure {
 		kind = "invalid"
 	case "500", "2007", "1120", "1230":
 		kind, retry = "server", true
-	case "1234":
+	case "1234", "network", "upstream_stream_error", "proxy_auth_failed":
 		kind, retry = "network", true
 	case "503", "529", "1312", "engine_overloaded_error", "overloaded_error":
 		kind, retry = "overload", true
@@ -50,13 +50,15 @@ func classify(f *Failure) *Failure {
 		kind = "context"
 	case "1113", "1309", "1311", "1304", "1308", "1310", "1313", "1008", "1314", "1315":
 		kind = "terminal"
-	case "3012", "CAPTCHA_VERIFY_FAILED", "coding_plan_security_verification_required", "captcha_expired", "captcha_invalid", "F008", "F018", "F019":
+	case "3012", "CAPTCHA_VERIFY_FAILED", "coding_plan_security_verification_required", "captcha_expired", "captcha_invalid", "captcha_verification_failed", "captcha_duplicate_result", "upstream_waf_blocked", "upstream_risk_blocked", "F008", "F018", "F019":
 		kind = "risk"
 	case "timeout":
 		kind, retry = "timeout", true
 	}
 	if kind == "" {
 		switch {
+		case riskBlockMessage(f.Message):
+			kind = "risk"
 		case f.Status == 429:
 			kind, retry = "rate_limit", true
 		case f.Status == 401:
@@ -270,10 +272,13 @@ func (a *App) infer(ctx context.Context, o inferOptions) (*Result, *Failure) {
 			return fail(f)
 		}
 		regular++
-		accountFailures[id]++
 		if regular >= max(1, int(integer(p["max_attempts"]))) {
 			return fail(f)
 		}
+		if f.ProxyFailover {
+			continue
+		}
+		accountFailures[id]++
 		if accountFailures[id] >= 3 {
 			excluded[id] = true
 			delete(throttled, id)
@@ -305,7 +310,7 @@ func (a *App) logUsage(o inferOptions, r *Result, f *Failure, account M, attempt
 		if f.Kind == "busy" {
 			status = "busy"
 		}
-		code, message = f.Code, f.Message
+		code, message = f.Code, conciseFailureMessage(f)
 	}
 	timings := o.Timing.snapshot()
 	_ = a.exec("INSERT INTO usage_log(request_id,ts,key_id,client_ip,account_id,family,model,reasoning_level,stream,attempt_count,rotated_accounts,status,error_code,error_message,ttft_ms,total_ms,tokens_in,tokens_out,tokens_reasoning,cache_read,cache_write,prompt_hash,timings,trace_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", o.ID, nowMS(), o.Key["id"], o.IP, account["id"], account["family"], o.Model, nullable(o.Level), integer(o.Stream), attempts, js(rotated), status, code, message, timings["ttft_ms"], timings["total_ms"], u["inputTokens"], u["outputTokens"], u["reasoningTokens"], u["cacheReadTokens"], u["cacheWriteTokens"], hash(js(o.Body))[:12], js(timings), trace)

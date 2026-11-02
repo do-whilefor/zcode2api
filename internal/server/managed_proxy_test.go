@@ -97,6 +97,9 @@ func TestManagedProxyOfflineLifecycleAndDraftProbe(t *testing.T) {
 	response, err := a.api(first, nil, "GET", "/configs", "", nil, nil, nil)
 	must(t, err)
 	equal(t, obj(response.JSON["data"])["node"], "node-1")
+	if !a.markProxyFailure(first) {
+		t.Fatal("failed subscription node must have a replacement")
+	}
 	second, releaseSecond, err := a.pinOutboundProxy(ctx, nil)
 	must(t, err)
 	if selectedProxy(first) == selectedProxy(second) {
@@ -109,11 +112,14 @@ func TestManagedProxyOfflineLifecycleAndDraftProbe(t *testing.T) {
 	a.proxies.mu.Lock()
 	old.expires = time.Now().Add(-time.Second)
 	a.proxies.mu.Unlock()
-	_, releaseNew, err := a.pinOutboundProxy(ctx, nil)
+	refreshed, releaseNew, err := a.pinOutboundProxy(ctx, nil)
 	must(t, err)
 	if a.proxies.current == old || !old.alive() {
 		t.Fatal("refresh did not replace the runtime while preserving its active lease")
 	}
+	response, err = a.api(refreshed, nil, "GET", "/configs", "", nil, nil, nil)
+	must(t, err)
+	equal(t, obj(response.JSON["data"])["node"], "node-2")
 	releaseNew()
 	releaseFirst()
 	if old.alive() {
